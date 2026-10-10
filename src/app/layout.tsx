@@ -1,10 +1,12 @@
+import { AppProvider } from "@/components/provider";
 import type { Metadata } from "next";
-import { Google_Sans } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Google_Sans({
+const fontSans = Montserrat({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["100", "200", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -14,8 +16,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${fontSans.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col">
+        <AppProvider>{children}</AppProvider>
+      </body>
     </html>
   );
 }

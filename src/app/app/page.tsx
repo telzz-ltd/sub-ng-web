@@ -1,43 +1,59 @@
-import { Label } from "@/components/ui/label";
-import { Icon } from "@iconify/react";
+"use client";
+import { AppLayout } from "@/components/app/layout";
+import { WalletBalance } from "@/components/app/wallet-balance";
+import { Label } from "@heroui/react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { AppHeader } from "../../components/app/app-header";
-import { WalletBalance } from "../../components/app/wallet-balance";
-
-const stats = [
-  { label: "Airtime", amount: 20000 },
-  { label: "Data Bundles", amount: 20000 },
-  { label: "Exam Cards", amount: 20000 },
-  { label: "Cable TV", amount: 20000 },
-];
+import { BsCardHeading, BsCash } from "react-icons/bs";
+import { HiOutlineLightBulb } from "react-icons/hi";
+import { ImConnection } from "react-icons/im";
+import { MdConnectedTv, MdPhonelinkRing } from "react-icons/md";
+import { RxDashboard } from "react-icons/rx";
+import { TbCashBanknote } from "react-icons/tb";
 
 const quickLinks = [
-  { label: "Airtime", href: "#", icon: "flat-color-icons:missed-call" },
-  { label: "Data", href: "#", icon: "carbon:data-vis-1" },
+  { label: "Airtime", href: "#", icon: MdPhonelinkRing },
+  { label: "Data", href: "#", icon: ImConnection },
   {
     label: "Airtime 2 Cash",
     href: "#",
-    icon: "fluent-emoji-flat:money-with-wings",
+    icon: TbCashBanknote,
   },
   {
     label: "Recharge Card",
     href: "#",
-    icon: "streamline-freehand-color:credit-card-smartphone",
+    icon: BsCash,
   },
-  { label: "Electricity", href: "#", icon: "emojione-v1:light-bulb" },
-  { label: "Exam Card", href: "#", icon: "ph:exam-fill" },
-  { label: "Cable TV", href: "#", icon: "streamline-color:live-video-flat" },
-  { label: "More", href: "#", icon: "hugeicons:dashboard-square-add" },
+  { label: "Electricity", href: "#", icon: HiOutlineLightBulb },
+  { label: "Exam Card", href: "#", icon: BsCardHeading },
+  { label: "Cable TV", href: "#", icon: MdConnectedTv },
+  { label: "More", href: "#", icon: RxDashboard },
 ];
 
 export default function Page() {
+  const { data, refetch, isFetching } = useQuery({
+    queryFn: async () => {
+      await new Promise((r) => setTimeout(r, 2000));
+      return {
+        balance: Math.random() * 9999999999,
+        commission: Math.random() * 99999999,
+        stats: [
+          { label: "Airtime", amount: Math.random() * 9999999 },
+          { label: "Data Bundles", amount: Math.random() * 9999999 },
+          { label: "Exam Cards", amount: Math.random() * 99999999 },
+          { label: "Cable TV", amount: Math.random() * 999999 },
+        ],
+      };
+    },
+    queryKey: ["app-dashboard"],
+  });
   return (
-    <>
-      <AppHeader
-        title="Dashboard"
-        description="View insight on your activities"
-      />
-      <WalletBalance stats={stats} />
+    <AppLayout
+      title="Dashboard"
+      description="View insight on your activities"
+      onRefresh={refetch}
+    >
+      <WalletBalance data={data} loading={isFetching} />
       <div className="space-y-3">
         <h4 className="text-h6">Quick Links</h4>
         <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
@@ -47,12 +63,12 @@ export default function Page() {
               key={index}
               className="bg-white inline-flex flex-col gap-2 items-center py-3 rounded-xl hover:bg-primary/5 border"
             >
-              <Icon icon={link.icon} className="size-8 md:size-12" />
+              <link.icon className="size-8 md:size-12" />
               <Label className="text-xs md:text-sm">{link.label}</Label>
             </Link>
           ))}
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }

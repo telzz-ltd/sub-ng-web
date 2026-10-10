@@ -12,14 +12,10 @@ import {
   Label,
   TextField,
 } from "@heroui/react";
-import {
-  Envelope,
-  Eye,
-  EyeClosedIcon,
-  LockPasswordIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { useActionState, useState } from "react";
+import { BiEnvelope } from "react-icons/bi";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
+import { RiLockPasswordFill } from "react-icons/ri";
 
 const initialState = {
   errors: null,
@@ -44,7 +40,7 @@ export function LoginForm() {
             <Label>Email Address</Label>
             <InputGroup className="h-12 rounded-full bg-white">
               <InputGroup.Prefix>
-                <HugeiconsIcon icon={Envelope} />
+                <BiEnvelope />
               </InputGroup.Prefix>
               <InputGroup.Input placeholder="Enter email address" />
             </InputGroup>
@@ -58,20 +54,18 @@ export function LoginForm() {
             <Label>Password</Label>
             <InputGroup className="h-12 rounded-full bg-white">
               <InputGroup.Prefix>
-                <HugeiconsIcon icon={LockPasswordIcon} />
+                <RiLockPasswordFill />
               </InputGroup.Prefix>
               <InputGroup.Input placeholder="Enter password" />
               <InputGroup.Suffix onClick={() => setShowPassword(!showPassword)}>
-                <HugeiconsIcon icon={showPassword ? EyeClosedIcon : Eye} />
+                {showPassword ? <FaRegEye /> : <FaRegEyeSlash />}
               </InputGroup.Suffix>
             </InputGroup>
             <FieldError />
           </TextField>
-          <SubmitButton
-            isPending={pending}
-            label="Sign In"
-            className="h-12 text-base"
-          />
+          <SubmitButton isPending={pending} className="h-12 text-base">
+            Sign In
+          </SubmitButton>
         </FieldGroup>
       </Fieldset>
     </Form>

@@ -1,7 +1,5 @@
 import { FieldErrors } from "react-hook-form";
 
-export { cn } from "cn";
-
 export function formatCurrency(
   amount: number,
   opt: { currency?: string; locale?: string; hidden?: boolean } = {
@@ -14,15 +12,12 @@ export function formatCurrency(
     return "*****";
   }
 
-  return (
-    "₦ " +
-    new Intl.NumberFormat(opt.locale, {
-      style: "decimal",
-      currency: opt.currency ?? "NGN",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount)
-  );
+  return new Intl.NumberFormat(opt.locale, {
+    style: "decimal",
+    currency: opt.currency ?? "NGN",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
 }
 
 export function formatFormErrors(errors: FieldErrors): Record<string, string> {

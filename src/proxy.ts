@@ -5,7 +5,6 @@ export default async function proxy(req: NextRequest) {
   const c = await cookies();
   //   const accessToken = c.get("accessToken");
   const user = c.get("user");
-  console.log(user);
 
   const guestRoutes = [
     "/login",

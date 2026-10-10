@@ -1,12 +1,12 @@
 "use client";
 
-import { AppHeader } from "@/components/app/app-header";
+import { AppLayout } from "@/components/app/layout";
 import { SubmitButton } from "@/components/ui/form";
 import { formatAmount, useAmountInputProps } from "@/lib/amount";
-import { formatCurrency } from "@/lib/utils";
 import {
   Button,
   Card,
+  cn,
   Description,
   Form,
   InputGroup,
@@ -17,10 +17,10 @@ import {
   Typography,
 } from "@heroui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Edit02Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { AiOutlineEdit } from "react-icons/ai";
+import { HiOutlineArrowSmRight } from "react-icons/hi";
 import z from "zod";
 
 export default function Page() {
@@ -46,9 +46,8 @@ export default function Page() {
   });
 
   return (
-    <>
-      <AppHeader title="Fund Wallet" />
-      <Card className="max-w-4xl" hidden={accountDetails}>
+    <AppLayout title="Fund Wallet">
+      <Card className="max-w-4xl p-8 border" hidden={accountDetails}>
         <Card.Header>
           <Card.Title className="text-xl">Amount (₦)</Card.Title>
           <Description>Enter amount to fund in Naira</Description>
@@ -60,16 +59,32 @@ export default function Page() {
               name="amount"
               render={({ field }) => (
                 <TextField name={field.name}>
-                  <InputGroup className="h-14 rounded-full">
-                    <InputGroup.Prefix className="text-2xl">
-                      ₦
-                    </InputGroup.Prefix>
-                    <AmountInput
-                      {...field}
-                      placeholder="Enter amount"
-                      className="text-xl! font-medium"
-                    />
-                  </InputGroup>
+                  <Label>Choose Amount </Label>
+                  <RadioGroup
+                    value={field.value.toString()}
+                    onChange={(value) => field.onChange(parseInt(value, 10))}
+                    orientation="horizontal"
+                    onBlur={field.onBlur}
+                    aria-label={field.value.toString()}
+                  >
+                    {[500, 1000, 2000, 5000, 10000, 20000, 50000].map((v) => (
+                      <Radio value={v.toString()} key={v}>
+                        <Radio.Content
+                          className={cn(
+                            "group relative w-full rounded-xl border bg-surface px-5 py-4 transition-all data-[selected=true]:border-accent data-[selected=true]:bg-accent/10",
+                            "data-[focus-visible=true]:border-accent data-[focus-visible=true]:bg-accent/10",
+                          )}
+                        >
+                          {/* <Radio.Control>
+                          <Radio.Indicator />
+                        </Radio.Control> */}
+                          <span className="text-lg font-medium">
+                            ₦{v.toLocaleString("en-NG")}
+                          </span>
+                        </Radio.Content>
+                      </Radio>
+                    ))}
+                  </RadioGroup>
                 </TextField>
               )}
             />
@@ -78,33 +93,29 @@ export default function Page() {
               control={form.control}
               name="amount"
               render={({ field }) => (
-                <RadioGroup
-                  value={field.value.toString()}
-                  onChange={(value) => field.onChange(parseInt(value, 10))}
-                  orientation="horizontal"
-                  onBlur={field.onBlur}
-                >
-                  {[500, 1000, 2000, 5000, 10000, 20000, 50000].map((v) => (
-                    <Radio value={v.toString()} key={v}>
-                      <Radio.Content className="shadow p-3 rounded-2xl data-[focus-visible=true]:border-accent data-[focus-visible=true]:bg-accent/10">
-                        <Radio.Control>
-                          <Radio.Indicator />
-                        </Radio.Control>
-                        <span>{formatCurrency(v)}</span>
-                      </Radio.Content>
-                    </Radio>
-                  ))}
-                </RadioGroup>
+                <TextField name={field.name}>
+                  <Label>Enter custom amount</Label>
+                  <InputGroup className="h-14 border-b-2 border-b-inherit focus-within:ring-0 focus-within:border-b-accent rounded-none  shadow-none">
+                    <InputGroup.Prefix className="text-xl">₦</InputGroup.Prefix>
+                    <AmountInput
+                      {...field}
+                      placeholder="Enter amount"
+                      className="text-3xl! font-bold placeholder:text-lg placeholder:font-medium"
+                    />
+                  </InputGroup>
+                </TextField>
               )}
             />
 
             <SubmitButton
               type="submit"
-              className="w-full h-12 text-base"
+              className="w-full h-12 text-base mt-8"
               size="lg"
               isPending={isPending}
-              label="Continue"
-            />
+            >
+              Continue
+              <HiOutlineArrowSmRight />
+            </SubmitButton>
           </Form>
         </Card.Content>
       </Card>
@@ -140,11 +151,7 @@ export default function Page() {
                   form.setFocus("amount");
                 }}
               >
-                <HugeiconsIcon
-                  icon={Edit02Icon}
-                  strokeWidth={2}
-                  className="size-4"
-                />
+                <AiOutlineEdit />
               </Button>
             </div>
           </div>
@@ -159,7 +166,7 @@ export default function Page() {
           </Button>
         </Card.Footer>
       </Card>
-    </>
+    </AppLayout>
   );
 }
 
