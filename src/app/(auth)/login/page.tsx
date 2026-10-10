@@ -1,9 +1,9 @@
-import { Form } from "./form";
+import { LoginForm } from "./form";
 
 export default function Page() {
   return (
     <div>
-      <Form />
+      <LoginForm />
     </div>
   );
 }

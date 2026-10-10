@@ -1,15 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Label } from "@/components/ui/label";
 import { ButtonLink } from "@/components/ui/link";
-import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/lib/utils";
+import {
+  Button,
+  Disclosure,
+  Label,
+  Separator,
+  Surface,
+  Typography,
+} from "@heroui/react";
 import {
   ChevronDown,
   ChevronRight,
@@ -28,22 +28,22 @@ export function WalletBalance({ stats }: { stats: any[] }) {
   };
 
   return (
-    <div className="bg-gray-50 rounded-2xl overflow-hidden border">
-      <div className="bg-white px-4 py-3 rounded-2xl">
-        <div className="flex items-center gap-2 md:gap-1 mb-2">
-          <Label>Account Balance</Label>
+    <Surface className="bg-accent-soft rounded-2xl overflow-hidden shadow">
+      <Disclosure.Heading className="bg-accent p-4">
+        <div className="flex items-center gap-2 md:gap-1 mb-2 text-accent-foreground">
+          <Label className="text-accent-foreground">Account Balance</Label>
           <HugeiconsIcon
             icon={EyeOffIcon}
             size={16}
             strokeWidth={2}
             onClick={() => setHideBalance(!hideBalance)}
-            className="cursor-pointer hover:bg-gray-100 size-4 md:size-6 md:not-only:p-1 rounded-full"
+            className="cursor-pointer hover:bg-accent-hover size-4 md:size-6 md:not-only:p-1 rounded-full"
           />
           <HugeiconsIcon
             icon={Refresh01Icon}
             size={16}
             strokeWidth={2}
-            className="cursor-pointer hover:bg-gray-100 hidden md:inline md:size-6 md:p-1 rounded-full"
+            className="cursor-pointer hover:bg-accent-hover hidden md:inline md:size-6 md:p-1 rounded-full"
           />
           <Link
             href="/"
@@ -54,10 +54,12 @@ export function WalletBalance({ stats }: { stats: any[] }) {
           </Link>
         </div>
         <div className="flex items-center justify-between">
-          <h3 className="text-h3">{formatAmount(260000000)}</h3>
+          <Typography.Heading className="text-accent-foreground font-black">
+            {formatAmount(260000000)}
+          </Typography.Heading>
           <ButtonLink
             size="sm"
-            className="h-6 md:h-7 text-primary border-primary"
+            className="h-6 md:h-7 text-accent-foreground border-accent-foreground"
             variant="outline"
             href="/app/fund-wallet"
           >
@@ -65,10 +67,10 @@ export function WalletBalance({ stats }: { stats: any[] }) {
             Fund Wallet
           </ButtonLink>
         </div>
-      </div>
-      <Collapsible className="group">
-        <CollapsibleContent>
-          <div className="px-2 py-3">
+      </Disclosure.Heading>
+      <Disclosure className="group">
+        <Disclosure.Content>
+          <Disclosure.Body className="px-2 py-3">
             <Link href="/" className="flex items-center py-1 px-2">
               <h6 className="w-30 font-normal text-sm">Earnings</h6>
               <h5 className="font-normal">{formatAmount(260000)}</h5>
@@ -104,20 +106,20 @@ export function WalletBalance({ stats }: { stats: any[] }) {
                 </Link>
               ))}
             </div>
-          </div>
-        </CollapsibleContent>
-        <CollapsibleTrigger className="px-3 py-1 bg-gray-50 w-full flex items-center justify-center gap-2">
-          <span className="text-xs transition-all duration-300 group-data-open:hidden">
+          </Disclosure.Body>
+        </Disclosure.Content>
+        <Disclosure.Trigger className="px-3 py-1 w-full flex items-center justify-center gap-2">
+          <span className="text-xs transition-all duration-300 group-data-expanded:hidden">
             View Breakdown
           </span>
           <HugeiconsIcon
             icon={ChevronDown}
             size={17}
             strokeWidth={2}
-            className="transition-transform duration-150 group-data-open:rotate-180"
+            className="transition-transform duration-150 group-data-expanded:rotate-180"
           />
-        </CollapsibleTrigger>
-      </Collapsible>
-    </div>
+        </Disclosure.Trigger>
+      </Disclosure>
+    </Surface>
   );
 }

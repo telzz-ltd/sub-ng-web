@@ -1,22 +1,21 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import { Label } from "@/components/ui/label";
-import { Spinner } from "@/components/ui/spinner";
+import { AppHeader } from "@/components/app/app-header";
+import { SubmitButton } from "@/components/ui/form";
 import { formatAmount, useAmountInputProps } from "@/lib/amount";
+import { formatCurrency } from "@/lib/utils";
+import {
+  Button,
+  Card,
+  Description,
+  Form,
+  InputGroup,
+  Label,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from "@heroui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Edit02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -32,7 +31,6 @@ export default function Page() {
     startTransition(async () => {
       await new Promise((r) => setTimeout(r, 2000));
       setAccountDetails({});
-      console.log(values);
     });
   };
 
@@ -48,69 +46,94 @@ export default function Page() {
   });
 
   return (
-    <div className="max-w-xl mx-auto">
-      <form
-        className="space-y-4"
-        hidden={accountDetails}
-        onSubmit={form.handleSubmit((v) => submit(v))}
-      >
-        <Controller
-          control={form.control}
-          name="amount"
-          render={({ field, fieldState }) => (
-            <Field className="gap-1">
-              <FieldLabel className="text-base">Amount (₦)</FieldLabel>
-              <FieldDescription className="mb-2">
-                Enter amount to fund in Naira
-              </FieldDescription>
-              <InputGroup className="bg-white h-12 px-3">
-                <InputGroupAddon className="text-2xl">₦</InputGroupAddon>
-                <AmountInput
-                  {...field}
-                  placeholder="Enter amount"
-                  className="text-xl! font-medium"
-                  aria-invalid={!!fieldState.error}
-                />
-              </InputGroup>
-              <FieldDescription
-                hidden={!fieldState.error}
-                className="text-destructive"
-              >
-                {fieldState.error?.message}
-              </FieldDescription>
-            </Field>
-          )}
-        />
-        <Button
-          type="submit"
-          className="w-full h-12"
-          size="lg"
-          disabled={isPending}
-        >
-          {isPending && <Spinner />}
-          Continue
-        </Button>
-      </form>
+    <>
+      <AppHeader title="Fund Wallet" />
+      <Card className="max-w-4xl" hidden={accountDetails}>
+        <Card.Header>
+          <Card.Title className="text-xl">Amount (₦)</Card.Title>
+          <Description>Enter amount to fund in Naira</Description>
+        </Card.Header>
+        <Card.Content className="mt-4">
+          <Form className="space-y-4" onSubmit={form.handleSubmit(submit)}>
+            <Controller
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <TextField name={field.name}>
+                  <InputGroup className="h-14 rounded-full">
+                    <InputGroup.Prefix className="text-2xl">
+                      ₦
+                    </InputGroup.Prefix>
+                    <AmountInput
+                      {...field}
+                      placeholder="Enter amount"
+                      className="text-xl! font-medium"
+                    />
+                  </InputGroup>
+                </TextField>
+              )}
+            />
 
-      <Card className="" hidden={!accountDetails}>
-        <CardHeader className="border-b">
-          <CardTitle>Account Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+            <Controller
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <RadioGroup
+                  value={field.value.toString()}
+                  onChange={(value) => field.onChange(parseInt(value, 10))}
+                  orientation="horizontal"
+                  onBlur={field.onBlur}
+                >
+                  {[500, 1000, 2000, 5000, 10000, 20000, 50000].map((v) => (
+                    <Radio value={v.toString()} key={v}>
+                      <Radio.Content className="shadow p-3 rounded-2xl data-[focus-visible=true]:border-accent data-[focus-visible=true]:bg-accent/10">
+                        <Radio.Control>
+                          <Radio.Indicator />
+                        </Radio.Control>
+                        <span>{formatCurrency(v)}</span>
+                      </Radio.Content>
+                    </Radio>
+                  ))}
+                </RadioGroup>
+              )}
+            />
+
+            <SubmitButton
+              type="submit"
+              className="w-full h-12 text-base"
+              size="lg"
+              isPending={isPending}
+              label="Continue"
+            />
+          </Form>
+        </Card.Content>
+      </Card>
+
+      <Card className="max-w-3xl mx-auto" hidden={!accountDetails}>
+        <Card.Header>
+          <Card.Title className="text-2xl">Account Details</Card.Title>
+        </Card.Header>
+        <Card.Content className="space-y-4">
           <div className="space-y-1">
             <Label>Account Name:</Label>
-            <h2 className="text-h5">Subs.NG(Pay NGN 500.00)</h2>
+            <Typography.Heading level={5}>
+              Subs.NG(Pay NGN 500.00)
+            </Typography.Heading>
           </div>
           <div className="space-y-1">
             <Label>Bank Name:</Label>
-            <h2 className="text-h5">PalmPay</h2>
+            <Typography.Heading level={5}>PalmPay</Typography.Heading>
           </div>
           <div className="">
             <Label>Amount:</Label>
-            <h2 className="text-h3 flex items-center gap-1">
-              {formatAmount(form.getValues("amount"))}
+            <div className="flex items-center gap-1">
+              <Typography.Heading level={3}>
+                {formatAmount(form.getValues("amount"))}
+              </Typography.Heading>
+
               <Button
-                size="icon-xs"
+                isIconOnly
+                size="sm"
                 variant="ghost"
                 onClick={() => {
                   setAccountDetails(null);
@@ -123,20 +146,20 @@ export default function Page() {
                   className="size-4"
                 />
               </Button>
-            </h2>
+            </div>
           </div>
           <div className="">
             <Label>Account Number:</Label>
-            <h2 className="text-h1">9033456789</h2>
+            <Typography.Heading level={2}>9033456789</Typography.Heading>
           </div>
-        </CardContent>
-        <CardFooter>
+        </Card.Content>
+        <Card.Footer>
           <Button className="w-full" size="lg">
             I have made the payment
           </Button>
-        </CardFooter>
+        </Card.Footer>
       </Card>
-    </div>
+    </>
   );
 }
 
@@ -144,5 +167,5 @@ function AmountInput({ ...props }: React.ComponentProps<"input">) {
   const amountProps = useAmountInputProps({
     ...(props as any),
   });
-  return <InputGroupInput {...amountProps} />;
+  return <InputGroup.Input {...amountProps} />;
 }

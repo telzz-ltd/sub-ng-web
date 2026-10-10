@@ -1,13 +1,12 @@
-import { VariantProps } from "class-variance-authority";
-import { cn } from "cn";
+import { buttonVariants, cn } from "@heroui/styles";
 import Link, { LinkProps } from "next/link";
 import { ReactNode } from "react";
-import { buttonVariants } from "./button";
+import { type VariantProps } from "tailwind-variants";
 
 export function ButtonLink({
   className,
-  variant = "default",
-  size = "default",
+  variant = "primary",
+  size = "md",
   ...props
 }: LinkProps &
   VariantProps<typeof buttonVariants> & {

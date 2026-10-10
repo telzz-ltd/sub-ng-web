@@ -3,7 +3,7 @@ import { PropsWithChildren } from "react";
 
 export default function Layout({ children }: PropsWithChildren) {
   return (
-    <div className="grid md:grid-cols-2 min-h-screen">
+    <div className="grid md:grid-cols-2 min-h-screen bg-gray-50">
       <div className="bg-blue-900"></div>
       <div className="flex flex-col items-center justify-center gap-8">
         <div className="">

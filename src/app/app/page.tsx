@@ -1,7 +1,8 @@
 import { Label } from "@/components/ui/label";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
-import { WalletBalance } from "./components/wallet-balance";
+import { AppHeader } from "../../components/app/app-header";
+import { WalletBalance } from "../../components/app/wallet-balance";
 
 const stats = [
   { label: "Airtime", amount: 20000 },
@@ -31,7 +32,11 @@ const quickLinks = [
 
 export default function Page() {
   return (
-    <div className="space-y-5">
+    <>
+      <AppHeader
+        title="Dashboard"
+        description="View insight on your activities"
+      />
       <WalletBalance stats={stats} />
       <div className="space-y-3">
         <h4 className="text-h6">Quick Links</h4>
@@ -48,6 +53,6 @@ export default function Page() {
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }

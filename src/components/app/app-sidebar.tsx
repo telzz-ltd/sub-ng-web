@@ -1,25 +1,7 @@
+import { Avatar, Button, Typography } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "../../../components/ui/avatar";
-import { Button } from "../../../components/ui/button";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-} from "../../../components/ui/sidebar";
 
 const menus = [
   { label: "Home", link: "/app", icon: "hugeicons:dashboard-square-01" },
@@ -62,49 +44,60 @@ const menus = [
 
 export function AppSidebar() {
   return (
-    <Sidebar variant="inset" className="border-r">
-      <SidebarHeader>
+    <div className="border-r w-90 bg-mist-100 p-3 h-screen sticky top-0 flex flex-col gap-3">
+      <div className="h-18 py-3">
         <Link href="/">
           <Image src="/logo.png" width={150} height={80} alt="Subs.NG logo" />
         </Link>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Dashboad Menu</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menus.map((menu) => (
-                <SidebarMenuItem key={menu.link}>
-                  <SidebarMenuButton>
-                    <Icon icon={menu.icon} className="size-6!" />
-                    <span className="text-base">{menu.label}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter className="mb-4">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton>
+      </div>
+
+      <div className="grow overflow-y-auto">
+        <ul>
+          <li className="text-sm text-muted">Dashboad Menu</li>
+          {menus.map((menu) => (
+            <li
+              key={menu.link}
+              className="h-11 hover:bg-accent-soft group rounded-2xl"
+            >
+              <Link
+                href={menu.link}
+                className="flex items-center gap-3 h-full pl-2"
+              >
+                <Icon
+                  icon={menu.icon}
+                  className="size-6! group-hover:text-accent text-gray-600"
+                />
+                <span className="text-base text-gray-600 group-hover:text-accent">
+                  {menu.label}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="mt-auto">
+        <ul className="space-y-3">
+          <li>
+            <Link
+              href="/app/settings"
+              className="flex items-center gap-3 p-2 hover:bg-accent-soft w-full rounded-2xl cursor-pointer"
+            >
               <Avatar>
-                <AvatarImage
+                <Avatar.Image
                   alt="Bob"
                   src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
                 />
-                <AvatarFallback>DU</AvatarFallback>
+                <Avatar.Fallback>DU</Avatar.Fallback>
               </Avatar>
-              <div className="">
-                <h6 className="text-h6">Uthmman Muhammad</h6>
-                <p className="text-sm text-muted-foreground">
-                  Settings, Preferences etc...
-                </p>
+              <div className="flex flex-col text-left">
+                <Typography.Heading level={6}>
+                  Uthmman Muhammad
+                </Typography.Heading>
+                <p className="text-sm text-muted">Manage Settings</p>
               </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <div className="bg-foreground flex flex-col items-start gap-1 p-4 rounded-2xl my-3 text-background">
+            </Link>
+          </li>
+          <div className="bg-accent flex flex-col items-start gap-1 p-4 rounded-2xl text-background">
             <h3 className="font-medium">Download the App</h3>
             <p className="text-sm text-muted-background">
               Download the app for better mobile experience
@@ -125,9 +118,8 @@ export function AppSidebar() {
               </Button>
             </Link>
           </div>
-        </SidebarMenu>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+        </ul>
+      </div>
+    </div>
   );
 }

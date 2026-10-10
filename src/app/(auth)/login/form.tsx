@@ -1,74 +1,79 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { login } from "@/actions/auth";
+import { SubmitButton } from "@/components/ui/form";
 import {
-  Field,
-  FieldDescription,
+  Description,
+  FieldError,
   FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
-} from "@/components/ui/field";
-import {
+  Fieldset,
+  Form,
   InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import { Envelope } from "@hugeicons/core-free-icons";
+  Label,
+  TextField,
+} from "@heroui/react";
+import {
+  Envelope,
+  Eye,
+  EyeClosedIcon,
+  LockPasswordIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
+import { useActionState, useState } from "react";
 
-export function Form() {
+const initialState = {
+  errors: null,
+};
+
+export function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [state, formAction, pending] = useActionState<any, any>(
+    login,
+    initialState,
+  );
+
   return (
-    <form action="">
-      <FieldSet>
-        <FieldLegend>Sign In</FieldLegend>
-        <FieldDescription>Enter your details to sign in</FieldDescription>
+    <Form action={formAction} validationErrors={state?.errors}>
+      <Fieldset>
+        <Fieldset.Legend className="text-2xl">Sign In</Fieldset.Legend>
+        <Description className="text-sm">
+          Enter your details to sign in
+        </Description>
         <FieldGroup>
-          <Field>
-            <FieldLabel>
-              Email Address <span className="text-destructive">*</span>
-            </FieldLabel>
-            <InputGroup className="h-14">
-              <InputGroupAddon>
+          <TextField isRequired type="email" name="email">
+            <Label>Email Address</Label>
+            <InputGroup className="h-12 rounded-full bg-white">
+              <InputGroup.Prefix>
                 <HugeiconsIcon icon={Envelope} />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Enter email address"
-                type="email"
-                required
-              />
+              </InputGroup.Prefix>
+              <InputGroup.Input placeholder="Enter email address" />
             </InputGroup>
-          </Field>
-          <Field>
-            <div className="flex items-center justify-between">
-              <FieldLabel>
-                Password <span className="text-destructive">*</span>
-              </FieldLabel>
-              <Link
-                href="/forgot-password"
-                className="text-primary font-medium hover:underline"
-              >
-                Forgot Password
-              </Link>
-            </div>
-            <InputGroup className="h-14">
-              <InputGroupAddon>
-                <HugeiconsIcon icon={Envelope} />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Enter email address"
-                type="email"
-                required
-              />
+            <FieldError />
+          </TextField>
+          <TextField
+            type={showPassword ? "text" : "password"}
+            isRequired
+            name="password"
+          >
+            <Label>Password</Label>
+            <InputGroup className="h-12 rounded-full bg-white">
+              <InputGroup.Prefix>
+                <HugeiconsIcon icon={LockPasswordIcon} />
+              </InputGroup.Prefix>
+              <InputGroup.Input placeholder="Enter password" />
+              <InputGroup.Suffix onClick={() => setShowPassword(!showPassword)}>
+                <HugeiconsIcon icon={showPassword ? EyeClosedIcon : Eye} />
+              </InputGroup.Suffix>
             </InputGroup>
-          </Field>
-
-          <Button className="w-full h-14" size="lg">
-            Sign In
-          </Button>
+            <FieldError />
+          </TextField>
+          <SubmitButton
+            isPending={pending}
+            label="Sign In"
+            className="h-12 text-base"
+          />
         </FieldGroup>
-      </FieldSet>
-    </form>
+      </Fieldset>
+    </Form>
   );
 }
