@@ -51,7 +51,7 @@ export default function Page() {
     <AppLayout
       title="Dashboard"
       description="View insight on your activities"
-      onRefresh={refetch}
+      onRefresh={refetch as any}
     >
       <WalletBalance data={data} loading={isFetching} />
       <div className="space-y-3">
