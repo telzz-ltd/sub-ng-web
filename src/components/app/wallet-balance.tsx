@@ -5,16 +5,22 @@ import { formatAmount } from "@/lib/amount";
 import { Button, Disclosure, Label, Separator, Surface } from "@heroui/react";
 import Link from "next/link";
 import { useState } from "react";
-import { FaRegEyeSlash } from "react-icons/fa";
-import { FaAngleDown, FaAngleRight } from "react-icons/fa6";
+import {
+  FaAngleDown,
+  FaAngleRight,
+  FaRegEye,
+  FaRegEyeSlash,
+} from "react-icons/fa6";
 import { IoMdRefresh } from "react-icons/io";
 import { Naira } from "../ui/icons";
 
 export function WalletBalance({
   data,
   loading,
+  onRefresh,
 }: {
   loading?: boolean;
+  onRefresh: () => void;
   data?: {
     balance: number;
     commission: number;
@@ -38,10 +44,19 @@ export function WalletBalance({
             size="sm"
             onClick={() => setHideBalance(!hideBalance)}
           >
-            <FaRegEyeSlash className="size-5" />
+            {hideBalance ? (
+              <FaRegEyeSlash className="size-4" />
+            ) : (
+              <FaRegEye className="size-4" />
+            )}
           </Button>
-          <Button isIconOnly size="sm" className="hidden md:inline-flex">
-            <IoMdRefresh className="size-5" />
+          <Button
+            isIconOnly
+            size="sm"
+            className="hidden md:inline-flex"
+            onClick={onRefresh}
+          >
+            <IoMdRefresh className="size-4" />
           </Button>
           <Link
             href="/"

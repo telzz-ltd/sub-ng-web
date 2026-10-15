@@ -53,7 +53,7 @@ export default function Page() {
       description="View insight on your activities"
       onRefresh={refetch as any}
     >
-      <WalletBalance data={data} loading={isFetching} />
+      <WalletBalance data={data} loading={isFetching} onRefresh={refetch} />
       <div className="space-y-3">
         <h4 className="text-h6">Quick Links</h4>
         <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
