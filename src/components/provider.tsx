@@ -39,7 +39,8 @@ export function AppProvider({ children }: PropsWithChildren) {
       setAuth({
         accessToken: "cadbcvdahbvhb",
         user: {
-          "name": "Dev Baba"
+          name: "Usman Muhammad",
+          email: "usman@example.com",
         },
       });
     });

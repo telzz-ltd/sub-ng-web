@@ -2,23 +2,23 @@
 import { AppLayout } from "@/components/app/layout";
 import { WalletBalance } from "@/components/app/wallet-balance";
 import { WalletActivity } from "@/components/app/wallet-activity";
-import {
-  RecentTransactions,
-  type Transaction,
-} from "@/components/app/recent-transactions";
+import { RecentTransactions } from "@/components/app/recent-transactions";
 import { Button, Card, Flex, Typography } from "antd";
 import {
+  AppstoreOutlined,
   ArrowUpOutlined,
+  CreditCardOutlined,
+  FileTextOutlined,
+  MobileOutlined,
+  PlayCircleOutlined,
+  SwapOutlined,
+  ThunderboltOutlined,
   WalletOutlined,
+  WifiOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
+import { transactions as recentTransactions } from "@/lib/catalog";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { BsCardHeading, BsCash } from "react-icons/bs";
-import { HiOutlineLightBulb } from "react-icons/hi";
-import { ImConnection } from "react-icons/im";
-import { MdConnectedTv, MdPhonelinkRing } from "react-icons/md";
-import { RxDashboard } from "react-icons/rx";
-import { TbCashBanknote } from "react-icons/tb";
 
 const { Title, Text } = Typography;
 
@@ -29,109 +29,61 @@ export const Route = createFileRoute("/app/")({
 const quickLinks = [
   {
     label: "Airtime",
-    href: "#",
-    icon: MdPhonelinkRing,
+    to: "/app/services/airtime",
+    icon: MobileOutlined,
     color: "text-blue-600",
     background: "bg-blue-50",
   },
   {
     label: "Data",
-    href: "#",
-    icon: ImConnection,
+    to: "/app/services/data",
+    icon: WifiOutlined,
     color: "text-violet-600",
     background: "bg-violet-50",
   },
   {
     label: "Airtime 2 Cash",
-    href: "#",
-    icon: TbCashBanknote,
+    to: "/app/services/airtime-to-cash",
+    icon: SwapOutlined,
     color: "text-emerald-600",
     background: "bg-emerald-50",
   },
   {
     label: "Recharge Card",
-    href: "#",
-    icon: BsCash,
+    to: "/app/services/recharge-card",
+    icon: CreditCardOutlined,
     color: "text-amber-600",
     background: "bg-amber-50",
   },
   {
     label: "Electricity",
-    href: "#",
-    icon: HiOutlineLightBulb,
+    to: "/app/services/electricity",
+    icon: ThunderboltOutlined,
     color: "text-orange-600",
     background: "bg-orange-50",
   },
   {
     label: "Exam Card",
-    href: "#",
-    icon: BsCardHeading,
+    to: "/app/services/exam-card",
+    icon: FileTextOutlined,
     color: "text-pink-600",
     background: "bg-pink-50",
   },
   {
     label: "Cable TV",
-    href: "#",
-    icon: MdConnectedTv,
+    to: "/app/services/cable-tv",
+    icon: PlayCircleOutlined,
     color: "text-cyan-600",
     background: "bg-cyan-50",
   },
   {
     label: "More",
-    href: "#",
-    icon: RxDashboard,
+    to: "/app/services",
+    icon: AppstoreOutlined,
     color: "text-gray-600",
     background: "bg-gray-100",
   },
-];
-
-const recentTransactions: Transaction[] = [
-  {
-    id: "1",
-    description: "Wallet Funding",
-    reference: "TXN-100234",
-    date: "Oct 28, 2026",
-    amount: 20000,
-    type: "credit",
-    status: "Successful",
-  },
-  {
-    id: "2",
-    description: "MTN Data Bundle",
-    reference: "TXN-100233",
-    date: "Oct 28, 2026",
-    amount: 2500,
-    type: "debit",
-    status: "Successful",
-  },
-  {
-    id: "3",
-    description: "Airtime Purchase",
-    reference: "TXN-100232",
-    date: "Oct 27, 2026",
-    amount: 1000,
-    type: "debit",
-    status: "Pending",
-  },
-  {
-    id: "4",
-    description: "Commission",
-    reference: "TXN-100231",
-    date: "Oct 27, 2026",
-    amount: 350,
-    type: "credit",
-    status: "Successful",
-  },
-  {
-    id: "5",
-    description: "Electricity Bill",
-    reference: "TXN-100230",
-    date: "Oct 26, 2026",
-    amount: 5000,
-    type: "debit",
-    status: "Failed",
-  },
-];
+] as const;
 
 function RouteComponent() {
   const navigate = useNavigate();
@@ -154,11 +106,13 @@ function RouteComponent() {
     },
   });
 
-  const totalReceived = recentTransactions
+  const dashboardTransactions = recentTransactions.slice(0, 5);
+
+  const totalReceived = dashboardTransactions
     .filter((transaction) => transaction.type === "credit")
     .reduce((total, transaction) => total + transaction.amount, 0);
 
-  const totalSpent = recentTransactions
+  const totalSpent = dashboardTransactions
     .filter((transaction) => transaction.type === "debit")
     .reduce((total, transaction) => total + transaction.amount, 0);
 
@@ -194,7 +148,7 @@ function RouteComponent() {
               icon={<ArrowUpOutlined />}
               className="h-11! min-w-0 flex-1 font-medium!"
               onClick={() => {
-                // TODO: Connect the commission withdrawal flow.
+                void navigate({ to: "/app/commission" });
               }}
             >
               Withdraw Commission
@@ -217,9 +171,9 @@ function RouteComponent() {
               const Icon = item.icon;
 
               return (
-                <a
+                <Link
                   key={item.label}
-                  href={item.href}
+                  to={item.to}
                   className="group min-w-0"
                 >
                   <Card
@@ -248,7 +202,7 @@ function RouteComponent() {
                       </Text>
                     </Flex>
                   </Card>
-                </a>
+                </Link>
               );
             })}
           </div>
@@ -297,7 +251,7 @@ function RouteComponent() {
 
                 <Flex justify="space-between" align="center">
                   <Text type="secondary">Recent transactions</Text>
-                  <Text strong>{recentTransactions.length}</Text>
+                  <Text strong>{dashboardTransactions.length}</Text>
                 </Flex>
               </Flex>
             </Card>
@@ -305,10 +259,9 @@ function RouteComponent() {
         </section>
 
         <RecentTransactions
-          data={recentTransactions}
+          data={dashboardTransactions}
           onViewAll={() => {
-            // TODO: Navigate to your transaction history route.
-            void navigate({ to: "/app/" });
+            void navigate({ to: "/app/transactions" });
           }}
         />
       </div>

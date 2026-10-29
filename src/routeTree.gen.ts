@@ -19,8 +19,21 @@ import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-pass
 import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppCommissionRouteImport } from './routes/app/commission'
 import { Route as AppFundWalletRouteImport } from './routes/app/fund-wallet'
+import { Route as AppNotificationsRouteImport } from './routes/app/notifications'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
+import { Route as AppSupportRouteImport } from './routes/app/support'
+import { Route as AppTransactionsRouteImport } from './routes/app/transactions'
+import { Route as AppWalletRouteImport } from './routes/app/wallet'
+import { Route as AppServicesIndexRouteImport } from './routes/app/services/index'
+import { Route as AppServicesAirtimeRouteImport } from './routes/app/services/airtime'
+import { Route as AppServicesAirtimeToCashRouteImport } from './routes/app/services/airtime-to-cash'
+import { Route as AppServicesCableTvRouteImport } from './routes/app/services/cable-tv'
+import { Route as AppServicesDataRouteImport } from './routes/app/services/data'
+import { Route as AppServicesElectricityRouteImport } from './routes/app/services/electricity'
+import { Route as AppServicesExamCardRouteImport } from './routes/app/services/exam-card'
+import { Route as AppServicesRechargeCardRouteImport } from './routes/app/services/recharge-card'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -70,14 +83,80 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCommissionRoute = AppCommissionRouteImport.update({
+  id: '/commission',
+  path: '/commission',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppFundWalletRoute = AppFundWalletRouteImport.update({
   id: '/fund-wallet',
   path: '/fund-wallet',
   getParentRoute: () => AppRoute,
 } as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSupportRoute = AppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTransactionsRoute = AppTransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppWalletRoute = AppWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppServicesIndexRoute = AppServicesIndexRouteImport.update({
+  id: '/services/',
+  path: '/services/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppServicesAirtimeRoute = AppServicesAirtimeRouteImport.update({
+  id: '/services/airtime',
+  path: '/services/airtime',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppServicesAirtimeToCashRoute =
+  AppServicesAirtimeToCashRouteImport.update({
+    id: '/services/airtime-to-cash',
+    path: '/services/airtime-to-cash',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppServicesCableTvRoute = AppServicesCableTvRouteImport.update({
+  id: '/services/cable-tv',
+  path: '/services/cable-tv',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppServicesDataRoute = AppServicesDataRouteImport.update({
+  id: '/services/data',
+  path: '/services/data',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppServicesElectricityRoute = AppServicesElectricityRouteImport.update({
+  id: '/services/electricity',
+  path: '/services/electricity',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppServicesExamCardRoute = AppServicesExamCardRouteImport.update({
+  id: '/services/exam-card',
+  path: '/services/exam-card',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppServicesRechargeCardRoute = AppServicesRechargeCardRouteImport.update({
+  id: '/services/recharge-card',
+  path: '/services/recharge-card',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -89,9 +168,22 @@ export interface FileRoutesByFullPath {
   '/register': typeof AuthRegisterRoute
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
+  '/app/commission': typeof AppCommissionRoute
   '/app/fund-wallet': typeof AppFundWalletRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/settings': typeof AppSettingsRoute
+  '/app/support': typeof AppSupportRoute
+  '/app/transactions': typeof AppTransactionsRoute
+  '/app/wallet': typeof AppWalletRoute
   '/app/': typeof AppIndexRoute
+  '/app/services/airtime': typeof AppServicesAirtimeRoute
+  '/app/services/airtime-to-cash': typeof AppServicesAirtimeToCashRoute
+  '/app/services/cable-tv': typeof AppServicesCableTvRoute
+  '/app/services/data': typeof AppServicesDataRoute
+  '/app/services/electricity': typeof AppServicesElectricityRoute
+  '/app/services/exam-card': typeof AppServicesExamCardRoute
+  '/app/services/recharge-card': typeof AppServicesRechargeCardRoute
+  '/app/services/': typeof AppServicesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -100,9 +192,22 @@ export interface FileRoutesByTo {
   '/register': typeof AuthRegisterRoute
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
+  '/app/commission': typeof AppCommissionRoute
   '/app/fund-wallet': typeof AppFundWalletRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/settings': typeof AppSettingsRoute
+  '/app/support': typeof AppSupportRoute
+  '/app/transactions': typeof AppTransactionsRoute
+  '/app/wallet': typeof AppWalletRoute
   '/app': typeof AppIndexRoute
+  '/app/services/airtime': typeof AppServicesAirtimeRoute
+  '/app/services/airtime-to-cash': typeof AppServicesAirtimeToCashRoute
+  '/app/services/cable-tv': typeof AppServicesCableTvRoute
+  '/app/services/data': typeof AppServicesDataRoute
+  '/app/services/electricity': typeof AppServicesElectricityRoute
+  '/app/services/exam-card': typeof AppServicesExamCardRoute
+  '/app/services/recharge-card': typeof AppServicesRechargeCardRoute
+  '/app/services': typeof AppServicesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,10 +219,23 @@ export interface FileRoutesById {
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/reset-password': typeof AuthResetPasswordRoute
   '/_auth/verify-email': typeof AuthVerifyEmailRoute
+  '/app/commission': typeof AppCommissionRoute
   '/app/fund-wallet': typeof AppFundWalletRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/settings': typeof AppSettingsRoute
+  '/app/support': typeof AppSupportRoute
+  '/app/transactions': typeof AppTransactionsRoute
+  '/app/wallet': typeof AppWalletRoute
   '/_public/': typeof PublicIndexRoute
   '/app/': typeof AppIndexRoute
+  '/app/services/airtime': typeof AppServicesAirtimeRoute
+  '/app/services/airtime-to-cash': typeof AppServicesAirtimeToCashRoute
+  '/app/services/cable-tv': typeof AppServicesCableTvRoute
+  '/app/services/data': typeof AppServicesDataRoute
+  '/app/services/electricity': typeof AppServicesElectricityRoute
+  '/app/services/exam-card': typeof AppServicesExamCardRoute
+  '/app/services/recharge-card': typeof AppServicesRechargeCardRoute
+  '/app/services/': typeof AppServicesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -129,9 +247,22 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/verify-email'
+    | '/app/commission'
     | '/app/fund-wallet'
+    | '/app/notifications'
     | '/app/settings'
+    | '/app/support'
+    | '/app/transactions'
+    | '/app/wallet'
     | '/app/'
+    | '/app/services/airtime'
+    | '/app/services/airtime-to-cash'
+    | '/app/services/cable-tv'
+    | '/app/services/data'
+    | '/app/services/electricity'
+    | '/app/services/exam-card'
+    | '/app/services/recharge-card'
+    | '/app/services/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,9 +271,22 @@ export interface FileRouteTypes {
     | '/register'
     | '/reset-password'
     | '/verify-email'
+    | '/app/commission'
     | '/app/fund-wallet'
+    | '/app/notifications'
     | '/app/settings'
+    | '/app/support'
+    | '/app/transactions'
+    | '/app/wallet'
     | '/app'
+    | '/app/services/airtime'
+    | '/app/services/airtime-to-cash'
+    | '/app/services/cable-tv'
+    | '/app/services/data'
+    | '/app/services/electricity'
+    | '/app/services/exam-card'
+    | '/app/services/recharge-card'
+    | '/app/services'
   id:
     | '__root__'
     | '/_auth'
@@ -153,10 +297,23 @@ export interface FileRouteTypes {
     | '/_auth/register'
     | '/_auth/reset-password'
     | '/_auth/verify-email'
+    | '/app/commission'
     | '/app/fund-wallet'
+    | '/app/notifications'
     | '/app/settings'
+    | '/app/support'
+    | '/app/transactions'
+    | '/app/wallet'
     | '/_public/'
     | '/app/'
+    | '/app/services/airtime'
+    | '/app/services/airtime-to-cash'
+    | '/app/services/cable-tv'
+    | '/app/services/data'
+    | '/app/services/electricity'
+    | '/app/services/exam-card'
+    | '/app/services/recharge-card'
+    | '/app/services/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -237,6 +394,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/commission': {
+      id: '/app/commission'
+      path: '/commission'
+      fullPath: '/app/commission'
+      preLoaderRoute: typeof AppCommissionRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/fund-wallet': {
       id: '/app/fund-wallet'
       path: '/fund-wallet'
@@ -244,11 +408,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFundWalletRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/settings': {
       id: '/app/settings'
       path: '/settings'
       fullPath: '/app/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/support': {
+      id: '/app/support'
+      path: '/support'
+      fullPath: '/app/support'
+      preLoaderRoute: typeof AppSupportRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/transactions': {
+      id: '/app/transactions'
+      path: '/transactions'
+      fullPath: '/app/transactions'
+      preLoaderRoute: typeof AppTransactionsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/wallet': {
+      id: '/app/wallet'
+      path: '/wallet'
+      fullPath: '/app/wallet'
+      preLoaderRoute: typeof AppWalletRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/services/': {
+      id: '/app/services/'
+      path: '/services'
+      fullPath: '/app/services/'
+      preLoaderRoute: typeof AppServicesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/services/airtime': {
+      id: '/app/services/airtime'
+      path: '/services/airtime'
+      fullPath: '/app/services/airtime'
+      preLoaderRoute: typeof AppServicesAirtimeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/services/airtime-to-cash': {
+      id: '/app/services/airtime-to-cash'
+      path: '/services/airtime-to-cash'
+      fullPath: '/app/services/airtime-to-cash'
+      preLoaderRoute: typeof AppServicesAirtimeToCashRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/services/cable-tv': {
+      id: '/app/services/cable-tv'
+      path: '/services/cable-tv'
+      fullPath: '/app/services/cable-tv'
+      preLoaderRoute: typeof AppServicesCableTvRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/services/data': {
+      id: '/app/services/data'
+      path: '/services/data'
+      fullPath: '/app/services/data'
+      preLoaderRoute: typeof AppServicesDataRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/services/electricity': {
+      id: '/app/services/electricity'
+      path: '/services/electricity'
+      fullPath: '/app/services/electricity'
+      preLoaderRoute: typeof AppServicesElectricityRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/services/exam-card': {
+      id: '/app/services/exam-card'
+      path: '/services/exam-card'
+      fullPath: '/app/services/exam-card'
+      preLoaderRoute: typeof AppServicesExamCardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/services/recharge-card': {
+      id: '/app/services/recharge-card'
+      path: '/services/recharge-card'
+      fullPath: '/app/services/recharge-card'
+      preLoaderRoute: typeof AppServicesRechargeCardRouteImport
       parentRoute: typeof AppRoute
     }
   }
@@ -284,15 +532,41 @@ const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
 interface AppRouteChildren {
+  AppCommissionRoute: typeof AppCommissionRoute
   AppFundWalletRoute: typeof AppFundWalletRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppSupportRoute: typeof AppSupportRoute
+  AppTransactionsRoute: typeof AppTransactionsRoute
+  AppWalletRoute: typeof AppWalletRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppServicesAirtimeRoute: typeof AppServicesAirtimeRoute
+  AppServicesAirtimeToCashRoute: typeof AppServicesAirtimeToCashRoute
+  AppServicesCableTvRoute: typeof AppServicesCableTvRoute
+  AppServicesDataRoute: typeof AppServicesDataRoute
+  AppServicesElectricityRoute: typeof AppServicesElectricityRoute
+  AppServicesExamCardRoute: typeof AppServicesExamCardRoute
+  AppServicesRechargeCardRoute: typeof AppServicesRechargeCardRoute
+  AppServicesIndexRoute: typeof AppServicesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCommissionRoute: AppCommissionRoute,
   AppFundWalletRoute: AppFundWalletRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppSupportRoute: AppSupportRoute,
+  AppTransactionsRoute: AppTransactionsRoute,
+  AppWalletRoute: AppWalletRoute,
   AppIndexRoute: AppIndexRoute,
+  AppServicesAirtimeRoute: AppServicesAirtimeRoute,
+  AppServicesAirtimeToCashRoute: AppServicesAirtimeToCashRoute,
+  AppServicesCableTvRoute: AppServicesCableTvRoute,
+  AppServicesDataRoute: AppServicesDataRoute,
+  AppServicesElectricityRoute: AppServicesElectricityRoute,
+  AppServicesExamCardRoute: AppServicesExamCardRoute,
+  AppServicesRechargeCardRoute: AppServicesRechargeCardRoute,
+  AppServicesIndexRoute: AppServicesIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

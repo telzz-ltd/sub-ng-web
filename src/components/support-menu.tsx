@@ -19,9 +19,9 @@ const supportOptions = [
     {
         key: "faq",
         icon: <QuestionCircleOutlined />,
-        title: "FAQs",
+        title: "Help center",
         description: "Find answers to common questions",
-        href: "/help",
+        href: "/app/support",
     },
     {
         key: "email",

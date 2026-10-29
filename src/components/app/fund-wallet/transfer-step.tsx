@@ -1,7 +1,7 @@
 
 import { Button, Card, Flex, Typography, message } from "antd";
 import { CopyOutlined, LeftOutlined } from "@ant-design/icons";
-import { formatAmount } from "@/lib/amount";
+import { formatNaira } from "@/lib/format";
 
 type Props = {
     amount: number;
@@ -58,7 +58,7 @@ export function TransferStep({ amount, onBack }: Props) {
                             Transfer amount
                         </Typography.Text>
                         <Typography.Title level={3} className="!mb-0 !mt-1">
-                            {formatAmount(amount)}
+                            {formatNaira(amount)}
                         </Typography.Title>
                     </div>
 

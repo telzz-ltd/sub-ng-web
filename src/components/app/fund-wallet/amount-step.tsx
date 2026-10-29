@@ -1,6 +1,6 @@
 
 import { Button, Card, Flex, Input, Typography } from "antd";
-import { formatAmount } from "@/lib/amount";
+import { formatNaira } from "@/lib/format";
 
 const presets = [1000, 2000, 5000, 10000, 20000, 50000];
 
@@ -59,7 +59,7 @@ export function AmountStep({
                                 type={amount === String(preset) ? "primary" : "default"}
                                 onClick={() => onAmountChange(String(preset))}
                             >
-                                {formatAmount(preset)}
+                                {formatNaira(preset, 0)}
                             </Button>
                         ))}
                     </div>
@@ -92,8 +92,8 @@ export function AmountStep({
                         </Typography.Text>
                         <Typography.Title level={4} className="!mb-0">
                             {amount !== "" && Number.isFinite(numericAmount)
-                                ? formatAmount(numericAmount)
-                                : formatAmount(0)}
+                                ? formatNaira(numericAmount)
+                                : formatNaira(0)}
                         </Typography.Title>
                     </Flex>
                 </div>

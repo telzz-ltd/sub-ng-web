@@ -11,8 +11,7 @@ import {
   ReloadOutlined,
   RightOutlined,
 } from "@ant-design/icons";
-import { formatAmount } from "@/lib/amount";
-import { Naira } from "../ui/icons";
+import { formatNaira } from "@/lib/format";
 
 type WalletBalanceProps = {
   loading?: boolean;
@@ -34,7 +33,7 @@ export function WalletBalance({
 
   const fmt = (amount = 0) => {
     if (loading) return "Loading...";
-    return hideBalance ? "*****" : Naira + formatAmount(amount);
+    return hideBalance ? "*****" : formatNaira(amount);
   };
 
   return (
@@ -65,7 +64,7 @@ export function WalletBalance({
           />
 
           <Link
-            to="/"
+            to="/app/transactions"
             className="ml-auto flex items-center gap-1 text-sm text-primary hover:underline"
           >
             History <RightOutlined className="text-xs" />
@@ -109,7 +108,7 @@ export function WalletBalance({
                   {data?.stats.map((stat) => (
                     <Link
                       key={stat.label}
-                      to="/"
+                      to="/app/transactions"
                       className="flex items-center rounded-xl px-2 py-1.5 transition-colors hover:bg-background"
                     >
                       <Typography.Text className="w-28! md:w-30!">

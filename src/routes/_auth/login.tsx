@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { App, Button, Checkbox, Form, Input, Typography, message } from "antd";
+import { App, Button, Checkbox, Form, Input, Typography } from "antd";
 import {
   LockOutlined,
   MailOutlined,

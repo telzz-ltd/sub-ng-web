@@ -5,6 +5,7 @@ import { ArrowLeftOutlined, MenuOutlined } from "@ant-design/icons";
 import { Button, Drawer, Flex, Layout, Typography } from "antd";
 
 import { AppSidebar } from "@/components/app/sidebar";
+import { useAuth } from "@/components/provider";
 import { SupportMenu } from "@/components/support-menu";
 import { NotificationMenu } from "@/components/notification-menu";
 import { UserMenu } from "@/components/user-menu";
@@ -21,7 +22,9 @@ export function AppLayout({
   description,
 }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
   const router = useRouter();
+  const firstName = user?.name?.split(" ")[0] ?? "there";
 
   const pathname = router.state.location.pathname.replace(/\/+$/, "");
   const isDashboard = pathname === "/app";
@@ -45,7 +48,7 @@ export function AppLayout({
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         closable={false}
-        width={260}
+        size={260}
         styles={{ body: { padding: 0 } }}
         className="lg:hidden"
       >
@@ -64,7 +67,7 @@ export function AppLayout({
             />
 
             <Typography.Text className="truncate text-base! font-semibold!">
-              Welcome, Usman
+              Welcome, {firstName}
             </Typography.Text>
           </Flex>
 

@@ -1,12 +1,18 @@
 import {
+  AppstoreOutlined,
+  BellOutlined,
   CreditCardOutlined,
   DashboardOutlined,
   DollarOutlined,
+  FileTextOutlined,
   MobileOutlined,
+  PlayCircleOutlined,
   SettingOutlined,
-  ShopOutlined,
+  SwapOutlined,
+  ThunderboltOutlined,
   TransactionOutlined,
   WalletOutlined,
+  WifiOutlined,
 } from "@ant-design/icons";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
@@ -24,32 +30,58 @@ const { Text } = Typography;
 
 const navigation = [
   { key: "/app", label: "Overview", icon: DashboardOutlined },
+  { key: "/app/wallet", label: "Wallet", icon: WalletOutlined },
   {
     key: "/app/transactions",
     label: "Transactions",
     icon: TransactionOutlined,
   },
   {
+    key: "/app/commission",
+    label: "Commissions",
+    icon: DollarOutlined,
+  },
+  {
     label: "Services",
     children: [
+      {
+        key: "/app/services",
+        label: "All services",
+        icon: AppstoreOutlined,
+      },
       { key: "/app/services/airtime", label: "Airtime", icon: MobileOutlined },
+      { key: "/app/services/data", label: "Data", icon: WifiOutlined },
       {
         key: "/app/services/recharge-card",
         label: "Recharge cards",
         icon: CreditCardOutlined,
       },
       {
+        key: "/app/services/airtime-to-cash",
+        label: "Airtime to cash",
+        icon: SwapOutlined,
+      },
+      {
         key: "/app/services/cable-tv",
         label: "Cable TV",
-        icon: ShopOutlined,
+        icon: PlayCircleOutlined,
+      },
+      {
+        key: "/app/services/electricity",
+        label: "Electricity",
+        icon: ThunderboltOutlined,
+      },
+      {
+        key: "/app/services/exam-card",
+        label: "Exam cards",
+        icon: FileTextOutlined,
       },
     ],
   },
-  { key: "/app/wallet", label: "Wallet", icon: WalletOutlined },
   {
-    key: "/app/commission",
-    label: "Commissions",
-    icon: DollarOutlined,
+    key: "/app/notifications",
+    label: "Notifications",
+    icon: BellOutlined,
   },
 ];
 

@@ -4,19 +4,29 @@ import {
     SettingOutlined,
     UserOutlined,
     SafetyCertificateOutlined,
-    RightOutlined,
 } from "@ant-design/icons";
 import { Avatar, Button, Dropdown, Flex, Typography, message } from "antd";
+import { useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/components/provider";
 import type { MenuProps } from "antd";
 
-const user = {
-    name: "Usman Muhammad",
-    email: "usman@example.com",
-    initials: "UM",
-};
+function getInitials(name: string) {
+    return name
+        .split(" ")
+        .map((part) => part[0])
+        .filter(Boolean)
+        .slice(0, 2)
+        .join("")
+        .toUpperCase();
+}
 
 export function UserMenu() {
     const [messageApi, contextHolder] = message.useMessage();
+    const navigate = useNavigate();
+    const { user } = useAuth();
+
+    const name = user?.name ?? "Guest";
+    const email = user?.email ?? "";
 
     const items: MenuProps["items"] = [
         {
@@ -24,7 +34,7 @@ export function UserMenu() {
             icon: <UserOutlined />,
             label: "My profile",
             onClick: () => {
-                // TODO: Navigate to the profile page.
+                void navigate({ to: "/app/settings" });
             },
         },
         {
@@ -32,7 +42,7 @@ export function UserMenu() {
             icon: <SettingOutlined />,
             label: "Account settings",
             onClick: () => {
-                // TODO: Navigate to account settings.
+                void navigate({ to: "/app/settings" });
             },
         },
         {
@@ -40,7 +50,7 @@ export function UserMenu() {
             icon: <SafetyCertificateOutlined />,
             label: "Security",
             onClick: () => {
-                // TODO: Navigate to security settings.
+                void navigate({ to: "/app/settings" });
             },
         },
         { type: "divider" },
@@ -50,7 +60,8 @@ export function UserMenu() {
             danger: true,
             label: "Sign out",
             onClick: () => {
-                messageApi.info("Connect this action to your logout flow.");
+                messageApi.success("Signed out");
+                void navigate({ to: "/login" });
             },
         },
     ];
@@ -71,18 +82,18 @@ export function UserMenu() {
                                     size={44}
                                     className="!bg-blue-100 !text-blue-700"
                                 >
-                                    {user.initials}
+                                    {getInitials(name)}
                                 </Avatar>
 
                                 <div className="min-w-0">
                                     <Typography.Text strong className="block truncate text-sm!">
-                                        {user.name}
+                                        {name}
                                     </Typography.Text>
                                     <Typography.Text
                                         type="secondary"
                                         className="block truncate text-xs!"
                                     >
-                                        {user.email}
+                                        {email}
                                     </Typography.Text>
                                 </div>
                             </Flex>
@@ -98,11 +109,9 @@ export function UserMenu() {
                     aria-label="Open user menu"
                     className="!flex !h-9 !w-9 !items-center !justify-center !p-0"
                 >
-                    <Avatar
-                        size={34}
-                        className="!bg-gray-100 !text-gray-600"
-                        icon={<UserOutlined />}
-                    />
+                    <Avatar size={34} className="!bg-blue-100 !text-blue-700">
+                        {getInitials(name)}
+                    </Avatar>
                 </Button>
             </Dropdown>
         </>
