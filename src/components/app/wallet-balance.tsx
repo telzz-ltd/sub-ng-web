@@ -1,24 +1,20 @@
+
 "use client";
 
-import { ButtonLink } from "@/components/ui/link";
-import { formatAmount } from "@/lib/amount";
-import { Button, Disclosure, Label, Separator, Surface } from "@heroui/react";
-import Link from "next/link";
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Button, Flex, Typography } from "antd";
 import {
-  FaAngleDown,
-  FaAngleRight,
-  FaRegEye,
-  FaRegEyeSlash,
-} from "react-icons/fa6";
-import { IoMdRefresh } from "react-icons/io";
+  DownOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
+  ReloadOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
+import { formatAmount } from "@/lib/amount";
 import { Naira } from "../ui/icons";
 
-export function WalletBalance({
-  data,
-  loading,
-  onRefresh,
-}: {
+type WalletBalanceProps = {
   loading?: boolean;
   onRefresh: () => void;
   data?: {
@@ -26,107 +22,126 @@ export function WalletBalance({
     commission: number;
     stats: { label: string; amount: number }[];
   };
-}) {
-  const [hideBalance, setHideBalance] = useState(false);
+};
 
-  const fmt = (amount: number = 0) => {
-    if (loading) return "loading...";
+export function WalletBalance({
+  data,
+  loading,
+  onRefresh,
+}: WalletBalanceProps) {
+  const [hideBalance, setHideBalance] = useState(false);
+  const [breakdownOpen, setBreakdownOpen] = useState(false);
+
+  const fmt = (amount = 0) => {
+    if (loading) return "Loading...";
     return hideBalance ? "*****" : Naira + formatAmount(amount);
   };
 
   return (
-    <Surface className="bg-accent-soft rounded-2xl overflow-hidden shadow">
-      <Disclosure.Heading className="bg-accent px-4 py-2 md:py-4 rounded-2xl md:space-y-2">
-        <div className="flex items-center text-accent-foreground">
-          <Label className="text-accent-foreground">Account Balance</Label>
+    <div className="overflow-hidden rounded-2xl bg-accent-soft">
+      <div className="rounded-2xl bg-accent px-4 py-4 text-accent-foreground md:px-5 md:py-5">
+        <Flex align="center" gap={1}>
+          <Typography.Text className="text-sm text-accent-foreground!">
+            Account balance
+          </Typography.Text>
+
           <Button
-            isIconOnly
-            size="sm"
-            onClick={() => setHideBalance(!hideBalance)}
-          >
-            {hideBalance ? (
-              <FaRegEyeSlash className="size-4" />
-            ) : (
-              <FaRegEye className="size-4" />
-            )}
-          </Button>
-          <Button
-            isIconOnly
-            size="sm"
-            className="hidden md:inline-flex"
-            onClick={onRefresh}
-          >
-            <IoMdRefresh className="size-4" />
-          </Button>
-          <Link
-            href="/"
-            className="text-sm ml-auto text-primary flex items-center hover:underline"
-          >
-            <span>History</span>
-            <FaAngleRight />
-          </Link>
-        </div>
-        <div className="flex items-center justify-between">
-          <h2 className="text-accent-foreground text-2xl md:text-3xl font-semibold">
-            {fmt(data?.balance)}
-          </h2>
-          <ButtonLink
-            size="sm"
-            className="h-6 md:h-7 text-accent-foreground border-accent-foreground"
-            variant="outline"
-            href="/app/fund-wallet"
-          >
-            Fund Wallet
-          </ButtonLink>
-        </div>
-      </Disclosure.Heading>
-      <Disclosure className="group">
-        <Disclosure.Content>
-          <Disclosure.Body className="md:px-2 py-3">
-            <Link href="/" className="flex items-center py-1 px-2">
-              <Label className="w-28 md:w-30">Earnings</Label>
-              <h5 className="font-normal">{fmt(data?.commission)}</h5>
-              <Button
-                className="ml-auto h-6 text-xs"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
-                Withdraw
-              </Button>
-            </Link>
-            <Separator variant="tertiary" className="my-3" />
-            <div>
-              <Label className="text-xs text-muted-foreground px-2">
-                Statistics
-              </Label>
-              {data?.stats.map((stat, index) => (
-                <Link
-                  href="/"
-                  className="flex py-1 items-center hover:bg-white px-2 rounded-2xl"
-                  key={index}
-                >
-                  <Label className="w-28 md:w-30">{stat.label}</Label>
-                  <h6 className="font-normal">{fmt(stat.amount)}</h6>
-                  <FaAngleRight size={18} className="ml-auto" />
-                </Link>
-              ))}
-            </div>
-          </Disclosure.Body>
-        </Disclosure.Content>
-        <Disclosure.Trigger className="px-3 py-1 w-full flex items-center justify-center gap-2">
-          <span className="text-xs transition-all duration-300 group-data-expanded:hidden">
-            View Breakdown
-          </span>
-          <FaAngleDown
-            size={17}
-            strokeWidth={2}
-            className="transition-transform duration-150 group-data-expanded:rotate-180"
+            type="text"
+            size="small"
+            aria-label={hideBalance ? "Show balance" : "Hide balance"}
+            icon={hideBalance ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+            onClick={() => setHideBalance((value) => !value)}
+            className="text-accent-foreground!"
           />
-        </Disclosure.Trigger>
-      </Disclosure>
-    </Surface>
+
+          <Button
+            type="text"
+            size="small"
+            aria-label="Refresh balance"
+            icon={<ReloadOutlined />}
+            onClick={onRefresh}
+            loading={loading}
+            className="hidden text-accent-foreground! md:inline-flex"
+          />
+
+          <Link
+            to="/"
+            className="ml-auto flex items-center gap-1 text-sm text-primary hover:underline"
+          >
+            History <RightOutlined className="text-xs" />
+          </Link>
+        </Flex>
+
+        <Typography.Title
+          level={2}
+          className="mb-0! mt-3! break-words text-3xl! font-semibold! leading-tight! text-accent-foreground! sm:text-4xl!"
+        >
+          {fmt(data?.balance)}
+        </Typography.Title>
+      </div>
+
+      <div className="px-3">
+        <div
+          className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${breakdownOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+            }`}
+        >
+          <div className="overflow-hidden">
+            <div
+              className={`space-y-3 py-2 transition-opacity duration-200 ${breakdownOpen ? "opacity-100" : "opacity-0"
+                }`}
+            >
+              <Flex align="center" gap={2} className="px-2">
+                <Typography.Text className="w-28! md:w-30!">
+                  Earnings
+                </Typography.Text>
+
+                <Typography.Text className="font-medium">
+                  {fmt(data?.commission)}
+                </Typography.Text>
+              </Flex>
+
+              <div>
+                <Typography.Text className="px-2 text-xs text-muted">
+                  Statistics
+                </Typography.Text>
+
+                <div className="mt-1">
+                  {data?.stats.map((stat) => (
+                    <Link
+                      key={stat.label}
+                      to="/"
+                      className="flex items-center rounded-xl px-2 py-1.5 transition-colors hover:bg-background"
+                    >
+                      <Typography.Text className="w-28! md:w-30!">
+                        {stat.label}
+                      </Typography.Text>
+
+                      <Typography.Text className="font-medium">
+                        {fmt(stat.amount)}
+                      </Typography.Text>
+
+                      <RightOutlined className="ml-auto text-xs text-muted" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Button
+          type="text"
+          block
+          onClick={() => setBreakdownOpen((open) => !open)}
+          className="flex! h-8! items-center! justify-center! gap-2! text-xs!"
+        >
+          {breakdownOpen ? "Hide breakdown" : "View breakdown"}
+          <DownOutlined
+            rotate={breakdownOpen ? 180 : 0}
+            className="text-xs transition-transform duration-300"
+          />
+        </Button>
+      </div>
+    </div>
   );
 }

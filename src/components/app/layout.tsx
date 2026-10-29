@@ -1,77 +1,113 @@
-"use client";
+
+import { useState } from "react";
+import { useRouter } from "@tanstack/react-router";
+import { ArrowLeftOutlined, MenuOutlined } from "@ant-design/icons";
+import { Button, Drawer, Flex, Layout, Typography } from "antd";
 
 import { AppSidebar } from "@/components/app/sidebar";
-import { useAuth } from "@/components/provider";
-import { Avatar, Button, Typography } from "@heroui/react";
-import { PropsWithChildren, useState } from "react";
-import { BiSupport } from "react-icons/bi";
-import { HiMenuAlt4 } from "react-icons/hi";
-import { IoNotificationsOutline } from "react-icons/io5";
-import { PullToRefresh } from "../ui/pull-to-refresh";
+import { SupportMenu } from "@/components/support-menu";
+import { NotificationMenu } from "@/components/notification-menu";
+import { UserMenu } from "@/components/user-menu";
 
-type AppLayoutProps = PropsWithChildren<{
+type AppLayoutProps = {
+  children: React.ReactNode;
   title: string;
   description?: string;
-  onRefresh?: () => Promise<void>;
-}>;
+};
 
 export function AppLayout({
   children,
   title,
   description,
-  onRefresh,
 }: AppLayoutProps) {
-  const [open, setOpen] = useState(false);
-  const { user } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
+
+  const pathname = router.state.location.pathname.replace(/\/+$/, "");
+  const isDashboard = pathname === "/app";
+
+  function handleBack() {
+    if (window.history.length > 1) {
+      router.history.back();
+    } else {
+      router.navigate({ to: "/app" });
+    }
+  }
 
   return (
-    <div className="flex bg-mist-50">
-      <AppSidebar open={open} onClose={() => setOpen(!open)} />
-      <PullToRefresh
-        onRefresh={onRefresh as any}
-        // disabled={!!onRefresh}
-        className="grow px-3 md:px-5 w-full max-w-8xl mx-auto"
+    <Layout className="min-h-svh bg-surface-muted!">
+      <div className="hidden lg:block">
+        <AppSidebar collapsed={false} />
+      </div>
+
+      <Drawer
+        placement="left"
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        closable={false}
+        width={260}
+        styles={{ body: { padding: 0 } }}
+        className="lg:hidden"
       >
-        <header className="flex items-center h-18 gap-4 md:mb-5">
-          <div className="space-x-4 flex items-center">
+        <AppSidebar collapsed={false} />
+      </Drawer>
+
+      <Layout className="min-w-0 bg-surface-muted!">
+        <Layout.Header className="sticky top-0 z-10 flex h-16! items-center justify-between gap-3 bg-surface-muted! px-4! sm:px-6!">
+          <Flex align="center" gap={2} className="min-w-0">
             <Button
-              isIconOnly
-              variant="ghost"
-              className="md:hidden"
-              onClick={() => setOpen(true)}
-            >
-              <HiMenuAlt4 className="size-8" />
-            </Button>
-            <h3 className="text-lg hidden md:block">
-              Welcome, {user?.name.split(" ")[0]}
-            </h3>
+              type="text"
+              icon={<MenuOutlined />}
+              aria-label="Open navigation menu"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            />
+
+            <Typography.Text className="truncate text-base! font-semibold!">
+              Welcome, Usman
+            </Typography.Text>
+          </Flex>
+
+          <Flex align="center" gap={8} className="shrink-0 sm:gap-3">
+            <SupportMenu />
+            <NotificationMenu />
+            <UserMenu />
+          </Flex>
+        </Layout.Header>
+
+        <Layout.Content className="mx-auto w-full max-w-screen-2xl px-4 py-5 sm:px-6 sm:py-6">
+          <div className="mb-6 sm:mb-8">
+            <Flex align="start" gap={2}>
+              {!isDashboard && (
+                <Button
+                  type="text"
+                  icon={<ArrowLeftOutlined />}
+                  aria-label="Go back"
+                  onClick={handleBack}
+                  className="mt-1 shrink-0"
+                />
+              )}
+
+              <div className="min-w-0">
+                <Typography.Title
+                  level={2}
+                  className="mb-1! text-xl! font-bold! sm:text-2xl!"
+                >
+                  {title}
+                </Typography.Title>
+
+                {description && (
+                  <Typography.Paragraph className="mb-0! text-sm! text-muted sm:text-base!">
+                    {description}
+                  </Typography.Paragraph>
+                )}
+              </div>
+            </Flex>
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
-            <Button variant="ghost" className={"size-12"}>
-              <BiSupport className="size-8" />
-            </Button>
-            <Button variant="ghost" className="size-12">
-              <IoNotificationsOutline className="size-8" />
-            </Button>
-            <Button variant="ghost" isIconOnly className={"size-12"}>
-              <Avatar className="size-full">
-                <Avatar.Fallback className={"text-lg"}>DU</Avatar.Fallback>
-              </Avatar>
-            </Button>
-          </div>
-        </header>
-        <div className="mb-4">
-          <Typography.Heading level={2} className="text-h3 font-black">
-            {title}
-          </Typography.Heading>
-          <Typography.Paragraph className="text-muted">
-            {description}
-          </Typography.Paragraph>
-        </div>
-        <div className="space-y-6">{children}</div>
-      </PullToRefresh>
-      <footer className="py-16"></footer>
-    </div>
+          {children}
+        </Layout.Content>
+      </Layout>
+    </Layout>
   );
 }

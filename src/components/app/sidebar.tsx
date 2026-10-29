@@ -1,149 +1,202 @@
-import { Avatar, Button, cn, Typography } from "@heroui/react";
-import Image from "next/image";
-import Link from "next/link";
-import { FaApple, FaGooglePlay } from "react-icons/fa6";
-import { GiWallet } from "react-icons/gi";
-import { GrCreditCard } from "react-icons/gr";
-import { MdConnectedTv, MdPhonelinkRing } from "react-icons/md";
-import { RxDashboard } from "react-icons/rx";
-import { TbMoneybagMove, TbTransactionDollar } from "react-icons/tb";
+import {
+  CreditCardOutlined,
+  DashboardOutlined,
+  DollarOutlined,
+  MobileOutlined,
+  SettingOutlined,
+  ShopOutlined,
+  TransactionOutlined,
+  WalletOutlined,
+} from "@ant-design/icons";
+import { Link, useRouterState } from "@tanstack/react-router";
+import {
+  Avatar,
+  ConfigProvider,
+  Layout,
+  Menu,
+  Typography,
+  theme,
+} from "antd";
+import type { MenuProps } from "antd";
 
-const menus = [
-  { label: "Home", link: "/app", icon: RxDashboard },
+const { Sider } = Layout;
+const { Text } = Typography;
+
+const navigation = [
+  { key: "/app", label: "Overview", icon: DashboardOutlined },
   {
+    key: "/app/transactions",
     label: "Transactions",
-    link: "/app/transactions",
-    icon: TbTransactionDollar,
+    icon: TransactionOutlined,
   },
   {
-    label: "Airtime",
-    link: "/app/services/airtime",
-    icon: MdPhonelinkRing,
+    label: "Services",
+    children: [
+      { key: "/app/services/airtime", label: "Airtime", icon: MobileOutlined },
+      {
+        key: "/app/services/recharge-card",
+        label: "Recharge cards",
+        icon: CreditCardOutlined,
+      },
+      {
+        key: "/app/services/cable-tv",
+        label: "Cable TV",
+        icon: ShopOutlined,
+      },
+    ],
   },
+  { key: "/app/wallet", label: "Wallet", icon: WalletOutlined },
   {
-    label: "Recharge Card",
-    link: "/app/services/recharge-card",
-    icon: GrCreditCard,
-  },
-  {
-    label: "Cable TV",
-    link: "/app/services/cable-tv",
-    icon: MdConnectedTv,
-  },
-  {
-    label: "Wallet",
-    link: "/app/wallet",
-    icon: GiWallet,
-  },
-  {
+    key: "/app/commission",
     label: "Commissions",
-    link: "/app/commission",
-    icon: TbMoneybagMove,
+    icon: DollarOutlined,
   },
 ];
 
+function createMenuItems(
+  entries: typeof navigation,
+): MenuProps["items"] {
+  return entries.map((entry) => {
+    if ("children" in entry) {
+      return {
+        key: entry.label,
+        label: entry.label,
+        type: "group" as const,
+        children: createMenuItems(entry.children as typeof navigation),
+      };
+    }
+
+    const Icon = entry.icon;
+
+    return {
+      key: entry.key,
+      icon: <Icon />,
+      label: <Link to={entry.key}>{entry.label}</Link>,
+    };
+  });
+}
+
+function getRoutes(entries: typeof navigation): string[] {
+  return entries.flatMap((entry) =>
+    "children" in entry ? getRoutes(entry.children as typeof navigation) : [entry.key],
+  );
+}
+
+const menuItems = createMenuItems(navigation);
+const routes = getRoutes(navigation).sort((a, b) => b.length - a.length);
+
 export function AppSidebar({
-  open,
-  onClose,
+  collapsed,
+  onNavigate,
 }: {
-  open?: boolean;
-  onClose?: () => void;
+  collapsed: boolean;
+  onNavigate?: () => void;
 }) {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+
+  const selectedKey =
+    routes.find(
+      (route) =>
+        pathname === route ||
+        (route !== "/app" && pathname.startsWith(`${route}/`)),
+    ) ?? "/app";
+
   return (
-    <div
-      className={cn(
-        "h-screen w-screen md:w-auto fixed md:sticky top-0 z-20 md:bg-transparent transition-all",
-        open ? "bg-backdrop left-0" : "bg-transparent -left-full",
-      )}
-      onClick={(e) => {
-        if (e.target == e.currentTarget) {
-          onClose?.();
-        }
+    <ConfigProvider
+      theme={{
+        algorithm: theme.defaultAlgorithm,
+        token: {
+          colorPrimary: "#2563eb",
+          borderRadius: 10,
+          controlHeight: 38,
+          fontSize: 14,
+        },
+        components: {
+          Menu: {
+            itemHeight: 42,
+            itemBorderRadius: 10,
+            itemMarginBlock: 3,
+            itemMarginInline: 0,
+            itemPaddingInline: 12,
+            itemColor: "#64748b",
+            itemSelectedColor: "#2563eb",
+            itemSelectedBg: "#eff6ff",
+            itemHoverBg: "#f8fafc",
+            itemHoverColor: "#2563eb",
+            groupTitleColor: "#94a3b8",
+            activeBarWidth: 0,
+            iconSize: 18,
+          },
+        },
       }}
     >
-      <div
-        className={cn(
-          "border-r w-3/4 md:w-80 bg-mist-100 p-3 h-full flex flex-col gap-3",
-        )}
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        width={256}
+        collapsedWidth={80}
+        theme="light"
+        className="sticky top-0 inset-s-0 h-svh overflow-y-auto border-e border-border bg-background"
       >
-        <div className="h-18 py-3">
-          <Link href="/">
-            <Image
+        <div className="flex min-h-full flex-col">
+          <Link
+            to="/app"
+            onClick={onNavigate}
+            className="flex h-18 shrink-0 items-center px-4"
+          >
+            <img
               src="/logo.png"
-              width={150}
-              height={80}
-              className=""
-              alt="Subs.NG logo"
+              width={collapsed ? 36 : 120}
+              height={40}
+              alt="Subs.NG"
+              className="max-w-full object-contain"
             />
           </Link>
-        </div>
 
-        <div className="grow overflow-y-auto">
-          <ul>
-            <li className="text-sm text-muted">Dashboad Menu</li>
-            {menus.map((menu) => (
-              <li
-                key={menu.link}
-                className="h-11 hover:bg-accent-soft group rounded-2xl"
-              >
-                <Link
-                  href={menu.link}
-                  className="flex items-center gap-3 h-full pl-2"
-                >
-                  <menu.icon className="size-6! group-hover:text-accent text-gray-600" />
-                  <span className="text-base text-gray-600 group-hover:text-accent">
-                    {menu.label}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <nav className="px-3 pb-3">
+            {!collapsed && (
+              <Text className="mb-2! block! px-3! text-xs! font-medium! tracking-wider! text-muted!">
+                WORKSPACE
+              </Text>
+            )}
+
+            <Menu
+              mode="inline"
+              inlineCollapsed={collapsed}
+              selectedKeys={[selectedKey]}
+              items={menuItems}
+              onClick={onNavigate}
+              className="border-e-0! bg-transparent!"
+            />
+          </nav>
+
+          <Link
+            to="/app/settings"
+            onClick={onNavigate}
+            className="mt-auto flex shrink-0 items-center gap-3 border-t border-border p-4 transition-colors hover:bg-surface-muted"
+          >
+            <Avatar
+              size={collapsed ? 40 : 42}
+              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+              icon={<SettingOutlined />}
+            />
+
+            {!collapsed && (
+              <div className="flex min-w-0 flex-1 flex-col">
+                <Text strong className="truncate">
+                  Account Settings
+                </Text>
+                <Text type="secondary" className="truncate text-xs">
+                  Manage your account
+                </Text>
+              </div>
+            )}
+          </Link>
         </div>
-        <div className="mt-auto">
-          <ul className="space-y-3">
-            <li>
-              <Link
-                href="/app/settings"
-                className="flex items-center gap-3 p-2 hover:bg-accent-soft w-full rounded-2xl cursor-pointer"
-              >
-                <Avatar>
-                  <Avatar.Image
-                    alt="Bob"
-                    src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
-                  />
-                  <Avatar.Fallback>DU</Avatar.Fallback>
-                </Avatar>
-                <div className="flex flex-col text-left">
-                  <Typography.Heading level={6}>
-                    Uthmman Muhammad
-                  </Typography.Heading>
-                  <p className="text-sm text-muted">Manage Settings</p>
-                </div>
-              </Link>
-            </li>
-            <div className="bg-accent flex flex-col items-start gap-1 p-4 rounded-2xl">
-              <Typography.Heading level={6} className="text-background">
-                Download the App
-              </Typography.Heading>
-              <p className="text-sm text-background">
-                Download the app for better mobile experience
-              </p>
-              <Link href="/" className="w-full mt-3">
-                <Button variant="secondary" className="w-full">
-                  <FaGooglePlay className="size-5" />
-                  <span>Google Play</span>
-                </Button>
-              </Link>
-              <Link href="/" className="w-full">
-                <Button variant="secondary" className="w-full">
-                  <FaApple className="text-2xl! size-6" />
-                  AppStore
-                </Button>
-              </Link>
-            </div>
-          </ul>
-        </div>
-      </div>
-    </div>
+      </Sider>
+    </ConfigProvider>
   );
 }

@@ -1,5 +1,5 @@
 import { buttonVariants, cn } from "@heroui/styles";
-import Link, { LinkProps } from "next/link";
+import { Link, LinkProps } from "@tanstack/react-router";
 import { ReactNode } from "react";
 import { type VariantProps } from "tailwind-variants";
 

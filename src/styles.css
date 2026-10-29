@@ -1,0 +1,61 @@
+@layer theme, base, antd, components, utilities;
+
+@import "tailwindcss";
+
+@theme {
+    /* Backgrounds */
+    --color-background: #ffffff;
+    --color-foreground: #111827;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f9fafb;
+
+    /* Text */
+    --color-muted: #6b7280;
+    --color-muted-foreground: #6b7280;
+
+    /* Borders and inputs */
+    --color-border: #e5e7eb;
+    --color-input: #e5e7eb;
+    --color-ring: #2563eb;
+
+    /* Brand */
+    --color-primary: #2563eb;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #f3f4f6;
+    --color-secondary-foreground: #111827;
+
+    /* Accent */
+    --color-accent: #2563eb;
+    --color-accent-foreground: #ffffff;
+    --color-accent-soft: #eff6ff;
+
+    /* Status */
+    --color-success: #16a34a;
+    --color-warning: #d97706;
+    --color-danger: #dc2626;
+    --color-info: #0284c7;
+}
+
+.ant-typography {
+    margin-block: 0;
+}
+
+/* Reduce space between vertical form labels and inputs */
+.ant-form-vertical .ant-form-item .ant-form-item-label {
+    padding-bottom: 0 !important;
+}
+
+.ant-form-vertical .ant-form-item .ant-form-item-label>label {
+    line-height: 1.2 !important;
+    height: auto !important;
+}
+
+/* Reduce space between form fields */
+.ant-form-vertical .ant-form-item {
+    margin-bottom: 8px !important;
+}
+
+/* Remove extra space around validation messages */
+.ant-form-vertical .ant-form-item-explain {
+    margin-top: 2px !important;
+}

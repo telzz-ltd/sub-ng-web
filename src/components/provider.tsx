@@ -1,6 +1,3 @@
-"use client";
-
-import { Auth, getAuth } from "@/actions/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   createContext,
@@ -10,6 +7,15 @@ import {
   useState,
   useTransition,
 } from "react";
+
+import { App, ConfigProvider, theme } from "antd"
+import { StyleProvider } from "@ant-design/cssinjs";
+
+export type Auth = {
+  user: any;
+  accessToken: string | null;
+  refreshToken?: string | null;
+};
 
 export const AuthContext = createContext<Auth>({
   user: null,
@@ -29,8 +35,13 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     startTransition(async () => {
-      const resp = await getAuth();
-      setAuth(resp);
+      // const resp = await getAuth();
+      setAuth({
+        accessToken: "cadbcvdahbvhb",
+        user: {
+          "name": "Dev Baba"
+        },
+      });
     });
   }, []);
 
@@ -40,7 +51,28 @@ export function AppProvider({ children }: PropsWithChildren) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>
+      <AuthContext.Provider value={auth}>
+        <StyleProvider layer>
+          <ConfigProvider
+            componentSize="large"
+            theme={{
+              algorithm: theme.defaultAlgorithm,
+              token: {
+                // fontSize: 15,
+                // controlHeight: 28,
+              },
+              components: {
+                Form: {
+                  verticalLabelPadding: 0,
+                  itemMarginBottom: 8,
+                },
+              },
+            }}
+          >
+            <App>{children}</App>
+          </ConfigProvider>
+        </StyleProvider>
+      </AuthContext.Provider>
     </QueryClientProvider>
   );
 }
