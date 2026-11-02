@@ -1,4 +1,7 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
+/// <reference types="vite/client" />
+
+import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
@@ -9,9 +12,20 @@ import { Toaster } from '@/components/ui/toast'
 import { Alert02Icon, Home01Icon, RefreshIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import '../styles.css'
+import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
+  head: () => ({
+    meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
+      { title: 'Subs.ng' },
+    ],
+    links: [
+      { rel: 'stylesheet', href: appCss },
+      { rel: 'shortcut icon', href: '/favicon.ico', type: 'image/x-icon' },
+    ],
+  }),
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
@@ -37,7 +51,7 @@ function NotFoundComponent() {
   )
 }
 
-function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
+function ErrorComponent({ reset }: { error: unknown; reset: () => void }) {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center px-4 text-center">
       <div className="max-w-md space-y-6">
@@ -65,11 +79,11 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   )
 }
 
-const queryClient = new QueryClient();
-
 function RootComponent() {
+  const [queryClient] = useState(() => new QueryClient())
+
   return (
-    <>
+    <RootDocument>
       <QueryClientProvider client={queryClient}>
         <Outlet />
       </QueryClientProvider>
@@ -85,6 +99,20 @@ function RootComponent() {
           },
         ]}
       />
-    </>
+    </RootDocument>
+  )
+}
+
+function RootDocument({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <div id="app">{children}</div>
+        <Scripts />
+      </body>
+    </html>
   )
 }

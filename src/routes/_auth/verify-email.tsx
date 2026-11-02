@@ -4,7 +4,7 @@ import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/component
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { getApiErrorMessage, isUnauthorizedError, sendEmailVerificationOtp, verifyEmail } from "@/lib/api";
-import { clearAuthSession, setAuthUser, useAuthSession } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, CheckmarkCircle02Icon, Key01Icon, MailSend01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_auth/verify-email")({
 });
 
 function VerifyEmailPage() {
-  const session = useAuthSession();
+  const session = useAuthStore((state) => state.session);
   const navigate = useNavigate();
   const [sending, setSending] = useState(false);
   const form = useForm<VerifyEmailValues>({
@@ -39,7 +39,7 @@ function VerifyEmailPage() {
       toast.add({ type: "success", description: response.message });
     } catch (error) {
       if (isUnauthorizedError(error)) {
-        clearAuthSession();
+        useAuthStore.getState().clearSession();
         await navigate({ to: "/login", replace: true });
         return;
       }
@@ -52,12 +52,12 @@ function VerifyEmailPage() {
   async function handleSubmit(values: VerifyEmailValues) {
     try {
       const response = await verifyEmail(values);
-      setAuthUser(response.data);
+      useAuthStore.getState().setUser(response.data);
       toast.add({ type: "success", description: response.message });
-      await navigate({ to: "/dashboard" });
+      await navigate({ to: "/app" });
     } catch (error) {
       if (isUnauthorizedError(error)) {
-        clearAuthSession();
+        useAuthStore.getState().clearSession();
         await navigate({ to: "/login", replace: true });
         return;
       }
@@ -90,7 +90,7 @@ function VerifyEmailPage() {
           <FieldDescription>
             Your email address is confirmed. You are ready to use your account.
           </FieldDescription>
-          <Button type="button" size="lg" className="w-full" onClick={() => navigate({ to: "/dashboard" })}>
+          <Button type="button" size="lg" className="w-full" onClick={() => navigate({ to: "/app" })}>
             Go to dashboard
             <HugeiconsIcon icon={ArrowRight} />
           </Button>
@@ -141,7 +141,7 @@ function VerifyEmailPage() {
         </FieldSet>
 
         <p className="mt-5 text-center text-sm">
-          <Link to="/dashboard" className="font-medium text-primary">
+          <Link to="/app" className="font-medium text-primary">
             Skip for now
           </Link>
         </p>

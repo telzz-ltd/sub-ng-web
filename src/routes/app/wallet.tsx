@@ -1,32 +1,33 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  Button,
-  Card,
-  Descriptions,
-  Flex,
-  Typography,
-  message,
-} from "antd";
-import {
-  ArrowDownOutlined,
-  ArrowUpOutlined,
-  CopyOutlined,
-  PlusOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  CopyIcon,
+  PlusIcon,
+  Wallet01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 import { AppLayout } from "@/components/app/layout";
 import { RecentTransactions } from "@/components/app/recent-transactions";
 import { StatCard } from "@/components/app/stat-card";
 import { WalletBalance } from "@/components/app/wallet-balance";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ButtonLink } from "@/components/ui/link";
+import { toast } from "@/components/ui/toast";
 import { transactions, walletAccount } from "@/lib/catalog";
 import { formatNaira } from "@/lib/format";
 
 export const Route = createFileRoute("/app/wallet")({
   component: WalletPage,
 });
-
-const { Text, Title } = Typography;
 
 const balance = 125500;
 const commission = 7350;
@@ -40,7 +41,6 @@ const stats = [
 
 function WalletPage() {
   const navigate = useNavigate();
-  const [messageApi, contextHolder] = message.useMessage();
 
   const totalReceived = transactions
     .filter((transaction) => transaction.type === "credit")
@@ -56,9 +56,9 @@ function WalletPage() {
   async function copyAccountNumber() {
     try {
       await navigator.clipboard.writeText(walletAccount.number);
-      messageApi.success("Account number copied");
+      toast.add({ type: "success", title: "Account number copied" });
     } catch {
-      messageApi.error("Unable to copy account number");
+      toast.add({ type: "error", title: "Unable to copy account number" });
     }
   }
 
@@ -67,60 +67,54 @@ function WalletPage() {
       title="Wallet"
       description="Manage your balance, funding and wallet activity."
     >
-      {contextHolder}
-
       <div className="space-y-5">
         <section className="space-y-3">
           <WalletBalance
             data={{ balance, commission, stats }}
-            onRefresh={() => messageApi.success("Wallet balance is up to date")}
+            onRefresh={() =>
+              toast.add({
+                type: "success",
+                title: "Wallet balance is up to date",
+              })
+            }
           />
 
-          <Flex gap={12}>
-            <Link to="/app/fund-wallet" className="min-w-0 flex-1">
-              <Button
-                type="primary"
-                block
-                size="large"
-                icon={<PlusOutlined />}
-                className="h-11! font-medium!"
-              >
-                Fund wallet
-              </Button>
-            </Link>
+          <div className="flex gap-3">
+            <ButtonLink to="/app/fund-wallet" className="h-11 min-w-0 flex-1 font-medium">
+              <HugeiconsIcon icon={PlusIcon} />
+              Fund wallet
+            </ButtonLink>
 
-            <Link to="/app/commission" className="min-w-0 flex-1">
-              <Button
-                block
-                size="large"
-                icon={<ArrowUpOutlined />}
-                className="h-11! font-medium!"
-              >
-                Withdraw commission
-              </Button>
-            </Link>
-          </Flex>
+            <ButtonLink
+              to="/app/commission"
+              variant="outline"
+              className="h-11 min-w-0 flex-1 font-medium"
+            >
+              <HugeiconsIcon icon={ArrowUp01Icon} />
+              Withdraw commission
+            </ButtonLink>
+          </div>
         </section>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard
             label="Money in"
             value={formatNaira(totalReceived)}
-            icon={<ArrowDownOutlined />}
+            icon={<HugeiconsIcon icon={ArrowDown01Icon} />}
             hint="Wallet credits"
             tone="green"
           />
           <StatCard
             label="Money out"
             value={formatNaira(totalSpent)}
-            icon={<ArrowUpOutlined />}
+            icon={<HugeiconsIcon icon={ArrowUp01Icon} />}
             hint="Successful payments"
             tone="blue"
           />
           <StatCard
             label="Commission"
             value={formatNaira(commission)}
-            icon={<WalletOutlined />}
+            icon={<HugeiconsIcon icon={Wallet01Icon} />}
             hint="Available to withdraw"
             tone="violet"
           />
@@ -132,51 +126,47 @@ function WalletPage() {
             onViewAll={() => navigate({ to: "/app/transactions" })}
           />
 
-          <Card
-            className="rounded-2xl border-gray-200"
-            styles={{ body: { padding: 20 } }}
-          >
-            <Flex vertical gap={12}>
-              <div>
-                <Title level={5} className="mb-1!">
-                  Wallet account
-                </Title>
-                <Text type="secondary" className="text-sm">
-                  Transfer to this account to fund your wallet.
-                </Text>
-              </div>
+          <Card className="rounded-2xl border-border">
+            <CardHeader>
+              <CardTitle>Wallet account</CardTitle>
+              <CardDescription>
+                Transfer to this account to fund your wallet.
+              </CardDescription>
+            </CardHeader>
 
-              <Descriptions
-                column={1}
-                size="small"
-                colon={false}
-                items={[
-                  { key: "name", label: "Account name", children: walletAccount.name },
-                  { key: "bank", label: "Bank", children: walletAccount.bank },
-                  {
-                    key: "number",
-                    label: "Account number",
-                    children: (
-                      <Flex align="center" justify="space-between" gap={8}>
-                        <Text strong>{walletAccount.number}</Text>
-                        <Button
-                          size="small"
-                          type="text"
-                          icon={<CopyOutlined />}
-                          onClick={copyAccountNumber}
-                          aria-label="Copy account number"
-                        />
-                      </Flex>
-                    ),
-                  },
-                ]}
-              />
+            <CardContent className="space-y-4">
+              <dl className="space-y-3 text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-muted-foreground">Account name</dt>
+                  <dd className="font-medium">{walletAccount.name}</dd>
+                </div>
 
-              <Text type="secondary" className="text-xs">
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-muted-foreground">Bank</dt>
+                  <dd className="font-medium">{walletAccount.bank}</dd>
+                </div>
+
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-muted-foreground">Account number</dt>
+                  <dd className="flex items-center gap-1">
+                    <span className="font-semibold">{walletAccount.number}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={copyAccountNumber}
+                      aria-label="Copy account number"
+                    >
+                      <HugeiconsIcon icon={CopyIcon} />
+                    </Button>
+                  </dd>
+                </div>
+              </dl>
+
+              <p className="text-xs text-muted-foreground">
                 Your wallet is credited automatically once the transfer is
                 confirmed.
-              </Text>
-            </Flex>
+              </p>
+            </CardContent>
           </Card>
         </div>
       </div>

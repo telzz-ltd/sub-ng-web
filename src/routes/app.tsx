@@ -9,6 +9,10 @@ import { useAuthStore } from "@/stores/auth";
 
 export const Route = createFileRoute("/app")({
   beforeLoad: () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
     const session = useAuthStore.getState().session;
 
     if (!session?.token) {

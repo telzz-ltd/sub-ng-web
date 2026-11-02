@@ -1,6 +1,15 @@
 
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { persist, createJSONStorage, type StateStorage } from "zustand/middleware";
+
+const noopStorage: StateStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+};
+
+const getStorage = (): StateStorage =>
+  typeof window === "undefined" ? noopStorage : window.localStorage;
 
 export type User = {
   id: number;
@@ -44,7 +53,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: "subsng.auth",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(getStorage),
       partialize: (state) => ({
         session: state.session,
       })

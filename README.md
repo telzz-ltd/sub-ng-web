@@ -17,6 +17,18 @@ To build this application for production:
 bun --bun run build
 ```
 
+The server bundle is written to `.output/`. Run it with the Bun runtime:
+
+```bash
+bun run start
+```
+
+You can also type-check the project:
+
+```bash
+bun run typecheck
+```
+
 ## Styling
 
 This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.

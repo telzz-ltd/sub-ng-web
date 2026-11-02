@@ -1,13 +1,13 @@
-import { useState, type FormEvent } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  UserIcon,
-  Mail01Icon,
   LockPasswordIcon,
-  Shield01Icon,
   Logout01Icon,
+  Mail01Icon,
+  Shield01Icon,
+  UserIcon,
 } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, type FormEvent } from "react";
 
 import { AppLayout } from "@/components/app/layout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -15,6 +15,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -23,13 +30,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
 import { networks } from "@/lib/catalog";
 
@@ -605,7 +605,7 @@ function SettingsPage() {
 
                   <div className="space-y-2">
                     <Label>Language</Label>
-                    <Select value={language} onValueChange={setLanguage}>
+                    <Select value={language} onValueChange={(value) => setLanguage(value ?? "")}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
@@ -620,7 +620,7 @@ function SettingsPage() {
                     <Label>Default network</Label>
                     <Select
                       value={defaultNetwork}
-                      onValueChange={setDefaultNetwork}
+                      onValueChange={(value) => setDefaultNetwork(value ?? "")}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select network" />
