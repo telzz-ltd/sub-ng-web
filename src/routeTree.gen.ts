@@ -22,6 +22,7 @@ import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppCommissionRouteImport } from './routes/app/commission'
 import { Route as AppFundWalletRouteImport } from './routes/app/fund-wallet'
 import { Route as AppNotificationsRouteImport } from './routes/app/notifications'
+import { Route as AppPricingRouteImport } from './routes/app/pricing'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
 import { Route as AppSupportRouteImport } from './routes/app/support'
 import { Route as AppTransactionsRouteImport } from './routes/app/transactions'
@@ -98,6 +99,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPricingRoute = AppPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/app/commission': typeof AppCommissionRoute
   '/app/fund-wallet': typeof AppFundWalletRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/pricing': typeof AppPricingRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/support': typeof AppSupportRoute
   '/app/transactions': typeof AppTransactionsRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/app/commission': typeof AppCommissionRoute
   '/app/fund-wallet': typeof AppFundWalletRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/pricing': typeof AppPricingRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/support': typeof AppSupportRoute
   '/app/transactions': typeof AppTransactionsRoute
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/app/commission': typeof AppCommissionRoute
   '/app/fund-wallet': typeof AppFundWalletRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/pricing': typeof AppPricingRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/support': typeof AppSupportRoute
   '/app/transactions': typeof AppTransactionsRoute
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/app/commission'
     | '/app/fund-wallet'
     | '/app/notifications'
+    | '/app/pricing'
     | '/app/settings'
     | '/app/support'
     | '/app/transactions'
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/app/commission'
     | '/app/fund-wallet'
     | '/app/notifications'
+    | '/app/pricing'
     | '/app/settings'
     | '/app/support'
     | '/app/transactions'
@@ -300,6 +311,7 @@ export interface FileRouteTypes {
     | '/app/commission'
     | '/app/fund-wallet'
     | '/app/notifications'
+    | '/app/pricing'
     | '/app/settings'
     | '/app/support'
     | '/app/transactions'
@@ -413,6 +425,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/app/notifications'
       preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pricing': {
+      id: '/app/pricing'
+      path: '/pricing'
+      fullPath: '/app/pricing'
+      preLoaderRoute: typeof AppPricingRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/settings': {
@@ -535,6 +554,7 @@ interface AppRouteChildren {
   AppCommissionRoute: typeof AppCommissionRoute
   AppFundWalletRoute: typeof AppFundWalletRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppPricingRoute: typeof AppPricingRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSupportRoute: typeof AppSupportRoute
   AppTransactionsRoute: typeof AppTransactionsRoute
@@ -554,6 +574,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCommissionRoute: AppCommissionRoute,
   AppFundWalletRoute: AppFundWalletRoute,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppPricingRoute: AppPricingRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSupportRoute: AppSupportRoute,
   AppTransactionsRoute: AppTransactionsRoute,
@@ -579,12 +600,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

@@ -1,14 +1,15 @@
-
-import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { ArrowLeftOutlined, MenuOutlined } from "@ant-design/icons";
-import { Button, Drawer, Flex, Layout, Typography } from "antd";
+
+import { Button } from "@/components/ui/button";
+import { SidebarProvider, SidebarTrigger, } from "@/components/ui/sidebar";
 
 import { AppSidebar } from "@/components/app/sidebar";
-import { useAuth } from "@/components/provider";
-import { SupportMenu } from "@/components/support-menu";
 import { NotificationMenu } from "@/components/notification-menu";
+import { SupportMenu } from "@/components/support-menu";
 import { UserMenu } from "@/components/user-menu";
+import { getAuthSession } from "@/stores/auth";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 type AppLayoutProps = {
   children: React.ReactNode;
@@ -16,14 +17,10 @@ type AppLayoutProps = {
   description?: string;
 };
 
-export function AppLayout({
-  children,
-  title,
-  description,
-}: AppLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user } = useAuth();
+export function AppLayout({ children, title, description }: AppLayoutProps) {
+  const user = getAuthSession()?.user;
   const router = useRouter();
+
   const firstName = user?.name?.split(" ")[0] ?? "there";
 
   const pathname = router.state.location.pathname.replace(/\/+$/, "");
@@ -38,79 +35,59 @@ export function AppLayout({
   }
 
   return (
-    <Layout className="min-h-svh bg-surface-muted!">
-      <div className="hidden lg:block">
-        <AppSidebar collapsed={false} />
-      </div>
+    <SidebarProvider>
+      <AppSidebar />
 
-      <Drawer
-        placement="left"
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        closable={false}
-        size={260}
-        styles={{ body: { padding: 0 } }}
-        className="lg:hidden"
-      >
-        <AppSidebar collapsed={false} />
-      </Drawer>
-
-      <Layout className="min-w-0 bg-surface-muted!">
-        <Layout.Header className="sticky top-0 z-10 flex h-16! items-center justify-between gap-3 bg-surface-muted! px-4! sm:px-6!">
-          <Flex align="center" gap={2} className="min-w-0">
-            <Button
-              type="text"
-              icon={<MenuOutlined />}
-              aria-label="Open navigation menu"
-              className="lg:hidden"
-              onClick={() => setSidebarOpen(true)}
-            />
-
-            <Typography.Text className="truncate text-base! font-semibold!">
+      <main className="w-full p-4 sm:p-6 space-y-4 sm:space-y-8 bg-accent">
+        {/* Header */}
+        <header className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <SidebarTrigger />
+            <span className="truncate sm:text-xl font-semibold">
               Welcome, {firstName}
-            </Typography.Text>
-          </Flex>
+            </span>
+          </div>
 
-          <Flex align="center" gap={8} className="shrink-0 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <SupportMenu />
             <NotificationMenu />
             <UserMenu />
-          </Flex>
-        </Layout.Header>
+          </div>
+        </header>
 
-        <Layout.Content className="mx-auto w-full max-w-screen-2xl px-4 py-5 sm:px-6 sm:py-6">
+        {/* Main content */}
+        <main className="mx-auto w-full max-w-screen-2xl flex-1">
           <div className="mb-6 sm:mb-8">
-            <Flex align="start" gap={2}>
+            <div className="flex items-start gap-2">
               {!isDashboard && (
                 <Button
-                  type="text"
-                  icon={<ArrowLeftOutlined />}
+                  variant="ghost"
+                  size="icon"
                   aria-label="Go back"
                   onClick={handleBack}
-                  className="mt-1 shrink-0"
-                />
+                  className="mt-0.5 shrink-0"
+                >
+                  <HugeiconsIcon icon={ArrowLeft01Icon} className="size-5" />
+                </Button>
               )}
 
               <div className="min-w-0">
-                <Typography.Title
-                  level={2}
-                  className="mb-1! text-xl! font-bold! sm:text-2xl!"
-                >
+                <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
                   {title}
-                </Typography.Title>
+                </h1>
 
                 {description && (
-                  <Typography.Paragraph className="mb-0! text-sm! text-muted sm:text-base!">
+                  <p className="mt-1 text-sm text-muted-foreground sm:text-base">
                     {description}
-                  </Typography.Paragraph>
+                  </p>
                 )}
               </div>
-            </Flex>
+            </div>
           </div>
 
           {children}
-        </Layout.Content>
-      </Layout>
-    </Layout>
+        </main>
+      </main>
+    </SidebarProvider>
   );
 }

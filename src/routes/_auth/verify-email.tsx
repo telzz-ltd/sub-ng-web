@@ -1,133 +1,151 @@
-
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { FormField, SubmitButton } from "@/components/form/form-field";
+import { Button } from "@/components/ui/button";
+import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
+import { getApiErrorMessage, isUnauthorizedError, sendEmailVerificationOtp, verifyEmail } from "@/lib/api";
+import { clearAuthSession, setAuthUser, useAuthSession } from "@/stores/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowRight, CheckmarkCircle02Icon, Key01Icon, MailSend01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { App, Button, Form, Input, Typography } from "antd";
-import { MailOutlined } from "@ant-design/icons";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const schema = z.object({
-    code: z.string().length(6, "Enter the 6-digit verification code").regex(/^\d{6}$/, "Enter a valid 6-digit code"),
+const verifyEmailSchema = z.object({
+  code: z.string().length(6, "Enter the 6-digit code"),
 });
 
-type VerifyEmailValues = z.infer<typeof schema>;
+type VerifyEmailValues = z.infer<typeof verifyEmailSchema>;
 
 export const Route = createFileRoute("/_auth/verify-email")({
-    validateSearch: z.object({
-        email: z.email().optional(),
-    }),
-    component: VerifyEmailPage,
+  component: VerifyEmailPage,
 });
 
 function VerifyEmailPage() {
-    const { email } = Route.useSearch();
-    const [isPending, setIsPending] = useState(false);
-    const [isResending, setIsResending] = useState(false);
-    const { message } = App.useApp();
-    const [form] = Form.useForm<VerifyEmailValues>();
+  const session = useAuthSession();
+  const navigate = useNavigate();
+  const [sending, setSending] = useState(false);
+  const form = useForm<VerifyEmailValues>({
+    resolver: zodResolver(verifyEmailSchema),
+    defaultValues: { code: "" },
+  });
 
-    async function handleSubmit(values: VerifyEmailValues) {
-        const result = schema.safeParse(values);
-        if (!result.success) return;
-
-        setIsPending(true);
-
-        try {
-            console.log({ email, code: result.data.code });
-            message.info("Connect your email verification handler to continue.");
-        } catch {
-            message.error("Unable to verify your email. Please try again.");
-        } finally {
-            setIsPending(false);
-        }
+  async function handleResend() {
+    setSending(true);
+    try {
+      const response = await sendEmailVerificationOtp();
+      toast.add({ type: "success", description: response.message });
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        clearAuthSession();
+        await navigate({ to: "/login", replace: true });
+        return;
+      }
+      toast.add({ type: "error", description: getApiErrorMessage(error) });
+    } finally {
+      setSending(false);
     }
+  }
 
-    async function handleResend() {
-        if (!email) {
-            message.error("Your email address is missing.");
-            return;
-        }
-
-        setIsResending(true);
-
-        try {
-            console.log({ email });
-            message.info("Connect your resend verification handler to continue.");
-        } catch {
-            message.error("Unable to resend the code. Please try again.");
-        } finally {
-            setIsResending(false);
-        }
+  async function handleSubmit(values: VerifyEmailValues) {
+    try {
+      const response = await verifyEmail(values);
+      setAuthUser(response.data);
+      toast.add({ type: "success", description: response.message });
+      await navigate({ to: "/dashboard" });
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        clearAuthSession();
+        await navigate({ to: "/login", replace: true });
+        return;
+      }
+      toast.add({ type: "error", description: getApiErrorMessage(error) });
     }
+  }
 
+  if (!session) {
     return (
-        <div>
-            <header className="mb-5">
-                <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                    <MailOutlined className="text-lg" />
-                </div>
-
-                <Typography.Title level={3} className="!mb-1 !mt-0 text-2xl!">
-                    Verify your email
-                </Typography.Title>
-
-                <Typography.Text type="secondary">
-                    Enter the 6-digit code sent to{" "}
-                    <Typography.Text strong>{email || "your email address"}</Typography.Text>.
-                </Typography.Text>
-            </header>
-
-            <Form
-                form={form}
-                layout="vertical"
-                requiredMark={false}
-                onFinish={handleSubmit}
-            >
-                <Form.Item
-                    name="code"
-                    label="Verification code"
-                    className="!mb-4"
-                    rules={[
-                        { required: true, message: "Enter the verification code" },
-                        { len: 6, message: "The code must contain 6 digits" },
-                        {
-                            pattern: /^\d{6}$/,
-                            message: "Enter a valid 6-digit code",
-                        },
-                    ]}
-                >
-                    <Input.OTP length={6} size="large" />
-                </Form.Item>
-
-                <Button
-                    htmlType="submit"
-                    type="primary"
-                    size="large"
-                    block
-                    loading={isPending}
-                >
-                    Verify email
-                </Button>
-            </Form>
-
-            <div className="mt-4 text-center text-sm">
-                <Typography.Text type="secondary">
-                    Didn't receive the code?{" "}
-                </Typography.Text>
-                <Button
-                    type="link"
-                    className="!p-0"
-                    loading={isResending}
-                    onClick={handleResend}
-                >
-                    Resend code
-                </Button>
-            </div>
-
-            <div className="mt-3 text-center text-sm">
-                <Link to="/login" className="text-blue-600">
-                    Back to sign in
-                </Link>
-            </div>
-        </div>
+      <FieldGroup>
+        <FieldSet>
+          <FieldLegend className="text-2xl!">Verify your email</FieldLegend>
+          <FieldDescription>Sign in to verify the email on your account.</FieldDescription>
+          <Link to="/login" className="font-medium text-primary">
+            Back to sign in
+          </Link>
+        </FieldSet>
+      </FieldGroup>
     );
+  }
+
+  if (session.user.emailVerified) {
+    return (
+      <FieldGroup>
+        <FieldSet>
+          <div className="flex size-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+            <HugeiconsIcon icon={CheckmarkCircle02Icon} size={24} />
+          </div>
+          <FieldLegend className="text-2xl!">Email verified</FieldLegend>
+          <FieldDescription>
+            Your email address is confirmed. You are ready to use your account.
+          </FieldDescription>
+          <Button type="button" size="lg" className="w-full" onClick={() => navigate({ to: "/dashboard" })}>
+            Go to dashboard
+            <HugeiconsIcon icon={ArrowRight} />
+          </Button>
+        </FieldSet>
+      </FieldGroup>
+    );
+  }
+
+  return (
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <FieldGroup>
+        <FieldSet>
+          <FieldLegend className="text-2xl!">Verify your email</FieldLegend>
+          <FieldDescription>
+            We sent a 6-digit code to <span className="font-medium text-foreground">{session.user.email}</span>.
+            Enter it below to confirm your account.
+          </FieldDescription>
+
+          <FieldGroup className="gap-4">
+            <FormField
+              icon={Key01Icon}
+              control={form.control}
+              name="code"
+              label="Verification Code"
+              placeholder="000000"
+              inputProps={{
+                inputMode: "numeric",
+                maxLength: 6,
+                autoComplete: "one-time-code",
+                autoFocus: true,
+              }}
+            />
+
+            <SubmitButton loading={form.formState.isSubmitting} text="Verify email" size="lg" />
+
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              disabled={sending}
+              onClick={handleResend}
+            >
+              {sending ? <Spinner /> : <HugeiconsIcon icon={MailSend01Icon} />}
+              Resend code
+            </Button>
+          </FieldGroup>
+        </FieldSet>
+
+        <p className="mt-5 text-center text-sm">
+          <Link to="/dashboard" className="font-medium text-primary">
+            Skip for now
+          </Link>
+        </p>
+      </FieldGroup>
+    </form>
+  );
 }

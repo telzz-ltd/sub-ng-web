@@ -1,16 +1,11 @@
+import { ArrowRight, CheckCircle, Shield } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { Typography } from "antd";
-import {
-  ArrowLeftOutlined,
-  CheckCircleFilled,
-  SafetyCertificateOutlined,
-} from "@ant-design/icons";
+
 
 export const Route = createFileRoute("/_auth")({
   component: AuthLayout,
 });
-
-const { Title, Paragraph, Text } = Typography;
 
 const highlights = [
   "Instant airtime, data and bill payments",
@@ -21,7 +16,7 @@ const highlights = [
 function AuthLayout() {
   return (
     <div className="grid min-h-svh bg-white md:grid-cols-2">
-      <aside className="relative hidden overflow-hidden bg-blue-700 p-10 text-white md:flex md:flex-col md:justify-between lg:p-12">
+      <aside className="relative hidden overflow-hidden bg-primary p-10 text-white md:flex md:flex-col md:justify-between lg:p-12">
         <div className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full bg-white/10" />
         <div className="pointer-events-none absolute -bottom-32 -left-20 size-96 rounded-full bg-white/10" />
 
@@ -38,32 +33,37 @@ function AuthLayout() {
           />
         </Link>
 
-        <div className="relative max-w-md">
-          <Title className="mb-3! text-3xl! text-white! lg:text-4xl!">
+        <div className="relative max-w-lg">
+          <h1 className="mb-4 text-4xl leading-tight text-white lg:text-5xl">
             Pay for everything. From one wallet.
-          </Title>
-          <Paragraph className="mb-6! text-blue-100!">
+          </h1>
+          <p className="mb-8 text-lg text-blue-100">
             Buy airtime, data, cable TV, electricity and exam cards in seconds
             with Subs.NG.
-          </Paragraph>
+          </p>
 
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {highlights.map((highlight) => (
               <li key={highlight} className="flex items-start gap-3">
-                <CheckCircleFilled className="mt-1 text-blue-200" />
-                <Text className="text-blue-50!">{highlight}</Text>
+                <HugeiconsIcon icon={CheckCircle} className="mt-1 text-lg text-blue-200" />
+                <span className="text-base text-blue-50">{highlight}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="relative flex items-center gap-2 text-sm text-blue-100">
-          <SafetyCertificateOutlined />
+        <div className="relative flex items-center gap-2 text-base text-blue-100">
+          <HugeiconsIcon icon={Shield} />
           <span>Secure, reliable payments trusted across Nigeria.</span>
         </div>
       </aside>
 
-      <main className="flex flex-col">
+      <main className="relative flex flex-col">
+        {/* <div className="absolute right-4 top-4 hidden md:block"> */}
+        {/* Theme toggle */}
+        {/* <ThemeToggle /> */}
+        {/* </div> */}
+
         <div className="flex items-center justify-between gap-3 p-4 md:hidden">
           <Link to="/" className="flex items-center">
             <img
@@ -75,13 +75,16 @@ function AuthLayout() {
             />
           </Link>
 
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1 text-sm font-medium text-gray-500"
-          >
-            <ArrowLeftOutlined />
-            Back
-          </Link>
+          <div className="flex items-center gap-2">
+            {/* Theme toggle */}
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1 text-sm font-medium text-gray-500"
+            >
+              Back
+              <HugeiconsIcon icon={ArrowRight} />
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6">

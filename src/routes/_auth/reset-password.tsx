@@ -1,131 +1,129 @@
-
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { App, Button, Form, Input, Typography } from "antd";
-import { LockOutlined } from "@ant-design/icons";
+import { FormField, SubmitButton } from "@/components/form/form-field";
+import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
+import { toast } from "@/components/ui/toast";
+import { getApiErrorMessage, resetPassword } from "@/lib/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft01Icon, Key01Icon, LockPasswordIcon, Mail01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const schema = z
-    .object({
-        password: z.string().min(8, "Password must be at least 8 characters"),
-        confirmPassword: z.string().min(1, "Confirm your password"),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-        message: "Passwords do not match",
-        path: ["confirmPassword"],
-    });
+const resetPasswordSchema = z
+  .object({
+    email: z.email("Enter a valid email address"),
+    code: z.string().length(6, "Enter the 6-digit code"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(72, "Password must be at most 72 characters"),
+    confirmPassword: z.string().min(1, "Confirm your new password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
-type ResetPasswordValues = z.infer<typeof schema>;
+type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 export const Route = createFileRoute("/_auth/reset-password")({
-    validateSearch: z.object({
-        token: z.string().optional(),
-    }),
-    component: ResetPasswordPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    email: typeof search.email === "string" ? search.email : "",
+  }),
+  component: ResetPasswordPage,
 });
 
 function ResetPasswordPage() {
-    const { token } = Route.useSearch();
-    const [isPending, setIsPending] = useState(false);
-    const { message } = App.useApp();
-    const [form] = Form.useForm<ResetPasswordValues>();
+  const { email } = Route.useSearch();
+  const navigate = useNavigate();
+  const form = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      email,
+      code: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    async function handleSubmit(values: ResetPasswordValues) {
-        const result = schema.safeParse(values);
-        if (!result.success) return;
-
-        if (!token) {
-            message.error("Your reset link is invalid or missing.");
-            return;
-        }
-
-        setIsPending(true);
-
-        try {
-            console.log({ token, password: result.data.password });
-            message.info("Connect your password reset handler to continue.");
-        } catch {
-            message.error("Unable to reset your password. Please try again.");
-        } finally {
-            setIsPending(false);
-        }
+  async function handleSubmit(values: ResetPasswordValues) {
+    try {
+      const response = await resetPassword({
+        email: values.email,
+        code: values.code,
+        password: values.password,
+      });
+      toast.add({ type: "success", description: response.message });
+      await navigate({ to: "/login" });
+    } catch (error) {
+      toast.add({ type: "error", description: getApiErrorMessage(error) });
     }
+  }
 
-    return (
-        <div>
-            <header className="mb-5">
-                <Typography.Title level={3} className="!mb-1 !mt-0 text-2xl!">
-                    Reset your password
-                </Typography.Title>
-                <Typography.Text type="secondary">
-                    Choose a new password for your account.
-                </Typography.Text>
-            </header>
+  return (
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <FieldGroup>
+        <FieldSet>
+          <FieldLegend className="text-2xl!">Reset your password</FieldLegend>
+          <FieldDescription>
+            Enter the code sent to your email and choose a new password.
+          </FieldDescription>
 
-            <Form
-                form={form}
-                layout="vertical"
-                requiredMark={false}
-                onFinish={handleSubmit}
-            >
-                <Form.Item
-                    name="password"
-                    label="New password"
-                    className="!mb-3"
-                    rules={[
-                        { required: true, message: "Enter a new password" },
-                        { min: 8, message: "Password must be at least 8 characters" },
-                    ]}
-                >
-                    <Input.Password
-                        size="large"
-                        prefix={<LockOutlined className="text-gray-400" />}
-                        placeholder="Enter new password"
-                        autoComplete="new-password"
-                    />
-                </Form.Item>
+          <FieldGroup className="gap-4">
+            <FormField
+              icon={Mail01Icon}
+              control={form.control}
+              name="email"
+              type="email"
+              label="Email Address"
+              placeholder="name@example.com"
+              inputProps={{ autoComplete: "email" }}
+            />
+            <FormField
+              icon={Key01Icon}
+              control={form.control}
+              name="code"
+              label="Reset Code"
+              placeholder="000000"
+              inputProps={{
+                inputMode: "numeric",
+                maxLength: 6,
+                autoComplete: "one-time-code",
+              }}
+            />
+            <FormField
+              control={form.control}
+              icon={LockPasswordIcon}
+              name="password"
+              type="password"
+              label="New Password"
+              placeholder="Create a new password"
+              inputProps={{ autoComplete: "new-password" }}
+            />
+            <FormField
+              control={form.control}
+              icon={LockPasswordIcon}
+              name="confirmPassword"
+              type="password"
+              label="Confirm New Password"
+              placeholder="Confirm your new password"
+              inputProps={{ autoComplete: "new-password" }}
+            />
 
-                <Form.Item
-                    name="confirmPassword"
-                    label="Confirm new password"
-                    className="!mb-4"
-                    dependencies={["password"]}
-                    rules={[
-                        { required: true, message: "Confirm your new password" },
-                        ({ getFieldValue }) => ({
-                            validator(_, value) {
-                                if (!value || getFieldValue("password") === value) {
-                                    return Promise.resolve();
-                                }
-                                return Promise.reject(new Error("Passwords do not match"));
-                            },
-                        }),
-                    ]}
-                >
-                    <Input.Password
-                        size="large"
-                        prefix={<LockOutlined className="text-gray-400" />}
-                        placeholder="Confirm new password"
-                        autoComplete="new-password"
-                    />
-                </Form.Item>
+            <SubmitButton loading={form.formState.isSubmitting} text="Reset password" size="lg" />
+          </FieldGroup>
+        </FieldSet>
 
-                <Button
-                    htmlType="submit"
-                    type="primary"
-                    size="large"
-                    block
-                    loading={isPending}
-                >
-                    Reset password
-                </Button>
-            </Form>
-
-            <div className="mt-5 text-center text-sm">
-                <Link to="/login" className="text-blue-600">
-                    Back to sign in
-                </Link>
-            </div>
-        </div>
-    );
+        <p className="mt-5 text-center text-sm">
+          <Link
+            to="/forgot-password"
+            className="inline-flex items-center gap-1 font-medium text-primary"
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} />
+            Send a new code
+          </Link>
+        </p>
+      </FieldGroup>
+    </form>
+  );
 }

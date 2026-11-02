@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Card, Typography } from "antd";
+
+import { Card, CardContent } from "@/components/ui/card";
 
 type ServiceLayoutProps = {
   form: ReactNode;
@@ -8,9 +9,9 @@ type ServiceLayoutProps = {
 
 export function ServiceLayout({ form, summary }: ServiceLayoutProps) {
   return (
-    <div className="mx-auto grid w-full max-w-5xl items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <Card className="rounded-2xl border-gray-200" styles={{ body: { padding: 20 } }}>
-        {form}
+    <div className="grid w-full max-w-5xl items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <Card className="rounded-2xl">
+        <CardContent className="p-5">{form}</CardContent>
       </Card>
 
       {summary}
@@ -27,10 +28,8 @@ export function ServiceFormHeader({
 }) {
   return (
     <div className="mb-5">
-      <Typography.Title level={4} className="mb-1!">
-        {title}
-      </Typography.Title>
-      <Typography.Text type="secondary">{description}</Typography.Text>
+      <h2 className="mb-1 text-lg font-semibold">{title}</h2>
+      <p className="text-sm text-muted-foreground">{description}</p>
     </div>
   );
 }
@@ -47,9 +46,10 @@ export function FormSection({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <Typography.Text strong>{title}</Typography.Text>
+        <h3 className="text-sm font-semibold">{title}</h3>
         {extra}
       </div>
+
       {children}
     </div>
   );

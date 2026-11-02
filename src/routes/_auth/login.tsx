@@ -1,11 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { App, Button, Checkbox, Form, Input, Typography } from "antd";
-import {
-  LockOutlined,
-  MailOutlined,
-  ArrowRightOutlined,
-} from "@ant-design/icons";
+import { FormField, SubmitButton } from "@/components/form/form-field";
+import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
+import { toast } from "@/components/ui/toast";
+import { getApiErrorMessage, login } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowRight, AtIcon, LockPasswordIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -20,122 +22,87 @@ export const Route = createFileRoute("/_auth/login")({
 });
 
 function LoginPage() {
-  const [isPending, setIsPending] = useState(false);
-  const { message } = App.useApp();
-  const [form] = Form.useForm<LoginValues>();
+  const navigate = useNavigate();
+
+  const setAuthSession = useAuthStore((s) => s.setSession);
+
+  const form = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   async function handleSubmit(values: LoginValues) {
-    const result = loginSchema.safeParse(values);
-
-    if (!result.success) {
-      return;
-    }
-
-    setIsPending(true);
-
     try {
-      console.log(result.data);
-      message.info("Connect your login handler to continue.");
-    } catch {
-      message.error("Something went wrong. Please try again.");
-    } finally {
-      setIsPending(false);
+      const response = await login(values);
+      setAuthSession(response.data);
+      toast.add({ type: "success", description: response.message });
+      await navigate({
+        to: response.data.user.emailVerified ? "/app" : "/verify-email",
+      });
+    } catch (error) {
+      toast.add({ type: "error", description: getApiErrorMessage(error) });
     }
   }
 
   return (
-    <div>
-      <header className="mb-5">
-        <Typography.Title level={3} className="!mb-1 !mt-0 text-2xl!">
-          Welcome back
-        </Typography.Title>
-        <Typography.Text type="secondary">
-          Sign in to manage your wallet and subscriptions.
-        </Typography.Text>
-      </header>
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <FieldGroup>
+        <FieldSet>
+          <FieldLegend className="text-2xl!">Welcome back</FieldLegend>
+          <FieldDescription>Sign in to manage your wallet and subscriptions.</FieldDescription>
 
-      <Form
-        form={form}
-        layout="vertical"
-        requiredMark={false}
-        onFinish={handleSubmit}
-        initialValues={{ email: "", password: "" }}
-      >
-        <Form.Item
-          name="email"
-          label="Email address"
-          className="!mb-3"
-          rules={[
-            { required: true, message: "Enter your email address" },
-            {
-              validator: async (_, value: string | undefined) => {
-                const result = z.email().safeParse(value);
-                if (value && !result.success) {
-                  throw new Error("Enter a valid email address");
-                }
-              },
-            },
-          ]}
-        >
-          <Input
-            size="large"
-            prefix={<MailOutlined className="text-gray-400" />}
-            placeholder="name@example.com"
-            autoComplete="email"
-          />
-        </Form.Item>
+          <FieldGroup className="gap-4">
+            <FormField
+              icon={AtIcon}
+              control={form.control}
+              name="email"
+              type="email"
+              label="Email Address"
+              placeholder="name@example.com"
+              inputProps={{ autoComplete: "email" }}
+            />
+            <FormField
+              control={form.control}
+              icon={LockPasswordIcon}
+              name="password"
+              type="password"
+              label="Password"
+              placeholder="Enter your password"
+              inputProps={{ autoComplete: "current-password" }}
+            />
 
-        <Form.Item
-          name="password"
-          label="Password"
-          className="!mb-3"
-          rules={[
-            { required: true, message: "Enter your password" },
-            {
-              min: 8,
-              message: "Password must be at least 8 characters",
-            },
-          ]}
-        >
-          <Input.Password
-            size="large"
-            prefix={<LockOutlined className="text-gray-400" />}
-            placeholder="Enter your password"
-            autoComplete="current-password"
-          />
-        </Form.Item>
+            <div className="flex justify-end text-sm">
+              <Link
+                to="/forgot-password"
+                className="whitespace-nowrap font-medium text-primary"
+              >
+                Forgot password?
+              </Link>
+            </div>
 
-        <div className="mb-4 flex items-center justify-between gap-3 text-sm">
-          <Checkbox>Remember me</Checkbox>
-          <Link
-            to="/forgot-password"
-            className="whitespace-nowrap text-blue-600"
-          >
-            Forgot password?
+            <SubmitButton
+              loading={form.formState.isSubmitting}
+              text={
+                <>
+                  Sign in
+                  <HugeiconsIcon icon={ArrowRight} />
+                </>
+              }
+              size="lg"
+            />
+          </FieldGroup>
+        </FieldSet>
+
+        <p className="mt-5 text-center text-sm">
+          <span> New to the platform? </span>
+          <Link to="/register" className="font-medium text-primary">
+            Create an account
           </Link>
-        </div>
-
-        <Button
-          htmlType="submit"
-          type="primary"
-          size="large"
-          block
-          loading={isPending}
-          icon={<ArrowRightOutlined />}
-          iconPlacement="end"
-        >
-          Sign in
-        </Button>
-      </Form>
-
-      <div className="mt-5 text-center text-sm">
-        <Typography.Text type="secondary">
-          New to Subs.NG?{" "}
-        </Typography.Text>
-        <Link to="/register" className="font-medium text-blue-600">
-          Create an account
-        </Link>
-      </div>
-    </div>
+        </p>
+      </FieldGroup>
+    </form>
   );
 }

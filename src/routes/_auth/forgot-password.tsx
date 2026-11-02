@@ -1,92 +1,78 @@
-
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { App, Button, Form, Input, Typography } from "antd";
-import { MailOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { FormField, SubmitButton } from "@/components/form/form-field";
+import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
+import { toast } from "@/components/ui/toast";
+import { getApiErrorMessage, sendPasswordResetOtp } from "@/lib/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft01Icon, Mail01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const schema = z.object({
-    email: z.email("Enter a valid email address"),
+const forgotPasswordSchema = z.object({
+  email: z.email("Enter a valid email address"),
 });
 
-type ForgotPasswordValues = z.infer<typeof schema>;
+type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 
 export const Route = createFileRoute("/_auth/forgot-password")({
-    component: ForgotPasswordPage,
+  component: ForgotPasswordPage,
 });
 
 function ForgotPasswordPage() {
-    const [isPending, setIsPending] = useState(false);
-    const { message } = App.useApp();
-    const [form] = Form.useForm<ForgotPasswordValues>();
+  const navigate = useNavigate();
+  const form = useForm<ForgotPasswordValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: { email: "" },
+  });
 
-    async function handleSubmit(values: ForgotPasswordValues) {
-        const result = schema.safeParse(values);
-        if (!result.success) return;
-
-        setIsPending(true);
-
-        try {
-            console.log(result.data);
-            message.success("If an account exists, password reset instructions will be sent.");
-        } catch {
-            message.error("Unable to process your request. Please try again.");
-        } finally {
-            setIsPending(false);
-        }
+  async function handleSubmit(values: ForgotPasswordValues) {
+    try {
+      const response = await sendPasswordResetOtp(values);
+      toast.add({ type: "success", description: response.message });
+      await navigate({
+        to: "/reset-password",
+        search: { email: values.email },
+      });
+    } catch (error) {
+      toast.add({ type: "error", description: getApiErrorMessage(error) });
     }
+  }
 
-    return (
-        <div>
-            <header className="mb-5">
-                <Typography.Title level={3} className="!mb-1 !mt-0 text-2xl!">
-                    Forgot password?
-                </Typography.Title>
-                <Typography.Text type="secondary">
-                    Enter your email address and we'll send you instructions to reset your password.
-                </Typography.Text>
-            </header>
+  return (
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <FieldGroup>
+        <FieldSet>
+          <FieldLegend className="text-2xl!">Forgot password?</FieldLegend>
+          <FieldDescription>
+            Enter your email address and we will send you a 6-digit code to reset your password.
+          </FieldDescription>
 
-            <Form
-                form={form}
-                layout="vertical"
-                requiredMark={false}
-                onFinish={handleSubmit}
-            >
-                <Form.Item
-                    name="email"
-                    label="Email address"
-                    className="!mb-4"
-                    rules={[
-                        { required: true, message: "Enter your email address" },
-                        { type: "email", message: "Enter a valid email address" },
-                    ]}
-                >
-                    <Input
-                        size="large"
-                        prefix={<MailOutlined className="text-gray-400" />}
-                        placeholder="name@example.com"
-                        autoComplete="email"
-                    />
-                </Form.Item>
+          <FieldGroup className="gap-4">
+            <FormField
+              icon={Mail01Icon}
+              control={form.control}
+              name="email"
+              type="email"
+              label="Email Address"
+              placeholder="name@example.com"
+              inputProps={{ autoComplete: "email", autoFocus: true }}
+            />
 
-                <Button
-                    htmlType="submit"
-                    type="primary"
-                    size="large"
-                    block
-                    loading={isPending}
-                >
-                    Send reset instructions
-                </Button>
-            </Form>
+            <SubmitButton loading={form.formState.isSubmitting} text="Send reset code" size="lg" />
+          </FieldGroup>
+        </FieldSet>
 
-            <div className="mt-5 text-center">
-                <Link to="/login" className="text-sm text-blue-600">
-                    <ArrowLeftOutlined className="mr-2" />
-                    Back to sign in
-                </Link>
-            </div>
-        </div>
-    );
+        <p className="mt-5 text-center text-sm">
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-1 font-medium text-primary"
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} />
+            Back to sign in
+          </Link>
+        </p>
+      </FieldGroup>
+    </form>
+  );
 }

@@ -4,14 +4,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppLayout } from "@/components/app/layout";
 import { AmountStep } from "@/components/app/fund-wallet/amount-step";
 import { TransferStep } from "@/components/app/fund-wallet/transfer-step";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/app/fund-wallet")({
   component: FundWalletPage,
 });
 
 function FundWalletPage() {
-  const [amount, setAmount] = useState("1000");
-  const [step, setStep] = useState<"amount" | "transfer">("amount");
+  const [accountDetails, setAccountDetails] = useState<any>(null);
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async () => {
+
+    },
+  })
 
   return (
     <AppLayout
@@ -19,23 +25,10 @@ function FundWalletPage() {
       description="Add money to your wallet to pay for airtime, data, bills and more."
     >
       <div className="mx-auto w-full max-w-xl py-6">
-        {step === "amount" ? (
-          <AmountStep
-            amount={amount}
-            onAmountChange={setAmount}
-            onContinue={() => {
-              const value = Number(amount);
-
-              if (Number.isFinite(value) && value >= 1000) {
-                setStep("transfer");
-              }
-            }}
-          />
+        {!accountDetails ? (
+          <AmountStep onContinue={mutate} />
         ) : (
-          <TransferStep
-            amount={Number(amount)}
-            onBack={() => setStep("amount")}
-          />
+          <TransferStep account={accountDetails} onBack={() => setAccountDetails(null)} />
         )}
       </div>
     </AppLayout>

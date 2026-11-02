@@ -1,5 +1,6 @@
+
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { App, Button, Form, Input, Segmented, Typography } from "antd";
 
 import { AppLayout } from "@/components/app/layout";
 import { BrandBadge } from "@/components/app/brand-badge";
@@ -10,6 +11,14 @@ import {
   ServiceLayout,
 } from "@/components/app/service-layout";
 import { SummaryCard } from "@/components/app/summary-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from "@/components/ui/radio-group";
+import { toast } from "@/components/ui/toast";
 import { electricityProviders } from "@/lib/catalog";
 import { formatNaira } from "@/lib/format";
 
@@ -27,28 +36,82 @@ type ElectricityValues = {
 };
 
 function ElectricityPage() {
-  const { modal } = App.useApp();
-  const [form] = Form.useForm<ElectricityValues>();
+  const [values, setValues] = useState<ElectricityValues>({
+    provider: "ikeja",
+    meterType: "prepaid",
+    meterNumber: "",
+    amount: "",
+  });
 
-  const providerId = Form.useWatch("provider", form) ?? "ikeja";
-  const meterType = Form.useWatch("meterType", form) ?? "prepaid";
-  const meterNumber = Form.useWatch("meterNumber", form);
-  const amount = Number(Form.useWatch("amount", form) ?? 0);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof ElectricityValues, string>>
+  >({});
 
-  const provider = electricityProviders.find((item) => item.id === providerId);
+  const provider = electricityProviders.find(
+    (item) => item.id === values.provider,
+  );
+
+  const amount = Number(values.amount);
   const total = Number.isFinite(amount) ? amount : 0;
 
-  function handleSubmit(values: ElectricityValues) {
-    modal.success({
+  function updateField<K extends keyof ElectricityValues>(
+    field: K,
+    value: ElectricityValues[K],
+  ) {
+    setValues((current) => ({
+      ...current,
+      [field]: value,
+      ...(field === "provider" ? { amount: "" } : {}),
+    }));
+
+    setErrors((current) => ({
+      ...current,
+      [field]: undefined,
+      ...(field === "provider" ? { amount: undefined } : {}),
+    }));
+  }
+
+  function validate() {
+    const nextErrors: typeof errors = {};
+
+    if (!values.provider) {
+      nextErrors.provider = "Select a provider";
+    }
+
+    if (!values.meterNumber) {
+      nextErrors.meterNumber = "Enter your meter number";
+    } else if (values.meterNumber.length < 10) {
+      nextErrors.meterNumber =
+        "Meter number must be at least 10 digits";
+    }
+
+    if (!values.amount) {
+      nextErrors.amount = "Enter an amount";
+    } else if (!Number.isFinite(amount) || amount < 500) {
+      nextErrors.amount = "The minimum amount is ₦500";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
+
+  function handleSubmit() {
+    if (!validate() || !provider) return;
+
+    toast.add({
+      type: "success",
       title: "Payment successful",
-      content:
+      description:
         values.meterType === "prepaid"
-          ? `${formatNaira(Number(values.amount))} has been paid to ${provider?.name}. Your prepaid token was sent to your email.`
-          : `${formatNaira(Number(values.amount))} has been paid to ${provider?.name} for meter ${values.meterNumber}.`,
-      okText: "Done",
+          ? `${formatNaira(amount)} has been paid to ${provider.name}. Your prepaid token was sent to your email.`
+          : `${formatNaira(amount)} has been paid to ${provider.name} for meter ${values.meterNumber}.`,
     });
 
-    form.resetFields(["meterNumber", "amount"]);
+    setValues((current) => ({
+      ...current,
+      meterNumber: "",
+      amount: "",
+    }));
   }
 
   return (
@@ -58,33 +121,18 @@ function ElectricityPage() {
     >
       <ServiceLayout
         form={
-          <Form
-            form={form}
-            layout="vertical"
-            requiredMark={false}
-            initialValues={{
-              provider: "ikeja",
-              meterType: "prepaid",
-              meterNumber: "",
-              amount: "",
-            }}
-            onValuesChange={(changed) => {
-              if (changed.provider) form.setFieldValue("amount", "");
-            }}
-            onFinish={handleSubmit}
-          >
+          <div>
             <ServiceFormHeader
               title="Electricity bill"
               description="Select your distribution company and enter your meter details."
             />
 
             <div className="space-y-5">
-              <Form.Item
-                name="provider"
-                label="Distribution company"
-                rules={[{ required: true, message: "Select a provider" }]}
-              >
+              <FormSection title="Distribution company">
                 <SelectionGrid
+                  columns={2}
+                  value={values.provider}
+                  onChange={(value) => updateField("provider", value)}
                   options={electricityProviders.map((item) => ({
                     value: item.id,
                     label: item.name,
@@ -97,57 +145,97 @@ function ElectricityPage() {
                     ),
                   }))}
                 />
-              </Form.Item>
 
-              <FormSection title="Meter type">
-                <Form.Item name="meterType" className="mb-0!">
-                  <Segmented
-                    block
-                    options={[
-                      { label: "Prepaid", value: "prepaid" },
-                      { label: "Postpaid", value: "postpaid" },
-                    ]}
-                  />
-                </Form.Item>
+                {errors.provider && (
+                  <p className="mt-1 text-xs text-destructive">
+                    {errors.provider}
+                  </p>
+                )}
               </FormSection>
 
-              <Form.Item
-                name="meterNumber"
-                label="Meter number"
-                normalize={(value: string) =>
-                  value.replace(/\D/g, "").slice(0, 13)
-                }
-                rules={[
-                  { required: true, message: "Enter your meter number" },
-                  {
-                    min: 10,
-                    message: "Meter number must be at least 10 digits",
-                  },
-                ]}
-              >
+              <FormSection title="Meter type">
+                <RadioGroup
+                  value={values.meterType}
+                  onValueChange={(value) =>
+                    updateField(
+                      "meterType",
+                      value as ElectricityValues["meterType"],
+                    )
+                  }
+                  className="grid grid-cols-2 gap-3"
+                >
+                  <Label
+                    htmlFor="prepaid"
+                    className="flex cursor-pointer items-center gap-3 rounded-xl border p-3"
+                  >
+                    <RadioGroupItem
+                      value="prepaid"
+                      id="prepaid"
+                    />
+                    <span className="text-sm font-medium">
+                      Prepaid
+                    </span>
+                  </Label>
+
+                  <Label
+                    htmlFor="postpaid"
+                    className="flex cursor-pointer items-center gap-3 rounded-xl border p-3"
+                  >
+                    <RadioGroupItem
+                      value="postpaid"
+                      id="postpaid"
+                    />
+                    <span className="text-sm font-medium">
+                      Postpaid
+                    </span>
+                  </Label>
+                </RadioGroup>
+              </FormSection>
+
+              <div className="space-y-2">
+                <Label htmlFor="meter-number">Meter number</Label>
                 <Input
+                  id="meter-number"
                   placeholder="Enter your meter number"
                   inputMode="numeric"
+                  value={values.meterNumber}
                   maxLength={13}
+                  onChange={(event) =>
+                    updateField(
+                      "meterNumber",
+                      event.target.value.replace(/\D/g, "").slice(0, 13),
+                    )
+                  }
                 />
-              </Form.Item>
+
+                {errors.meterNumber && (
+                  <p className="text-xs text-destructive">
+                    {errors.meterNumber}
+                  </p>
+                )}
+              </div>
 
               <FormSection
                 title="Amount"
                 extra={
-                  <Typography.Text type="secondary" className="text-xs">
-                    {meterType === "prepaid" ? "Prepaid" : "Postpaid"}
-                  </Typography.Text>
+                  <span className="text-xs text-muted-foreground">
+                    {values.meterType === "prepaid"
+                      ? "Prepaid"
+                      : "Postpaid"}
+                  </span>
                 }
               >
                 <div className="mb-3 grid grid-cols-3 gap-2">
                   {presets.map((preset) => (
                     <Button
                       key={preset}
-                      block
-                      type={amount === preset ? "primary" : "default"}
+                      className="w-full"
+                      size="sm"
+                      variant={
+                        amount === preset ? "default" : "outline"
+                      }
                       onClick={() =>
-                        form.setFieldValue("amount", String(preset))
+                        updateField("amount", String(preset))
                       }
                     >
                       {formatNaira(preset, 0)}
@@ -155,40 +243,36 @@ function ElectricityPage() {
                   ))}
                 </div>
 
-                <Form.Item
-                  name="amount"
-                  className="mb-0!"
-                  normalize={(value: string) =>
-                    value.replace(/[^\d.]/g, "")
-                  }
-                  rules={[
-                    { required: true, message: "Enter an amount" },
-                    {
-                      validator: (_, value: string) => {
-                        const numeric = Number(value);
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Custom amount</Label>
+                  <div className="relative">
+                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
+                      ₦
+                    </span>
+                    <Input
+                      id="amount"
+                      className="pl-8"
+                      placeholder="Enter a custom amount"
+                      inputMode="decimal"
+                      value={values.amount}
+                      onChange={(event) =>
+                        updateField(
+                          "amount",
+                          event.target.value.replace(/[^\d.]/g, ""),
+                        )
+                      }
+                    />
+                  </div>
 
-                        if (!value) return Promise.resolve();
-
-                        if (!Number.isFinite(numeric) || numeric < 500) {
-                          return Promise.reject(
-                            new Error("The minimum amount is ₦500"),
-                          );
-                        }
-
-                        return Promise.resolve();
-                      },
-                    },
-                  ]}
-                >
-                  <Input
-                    prefix="₦"
-                    placeholder="Enter a custom amount"
-                    inputMode="decimal"
-                  />
-                </Form.Item>
+                  {errors.amount && (
+                    <p className="text-xs text-destructive">
+                      {errors.amount}
+                    </p>
+                  )}
+                </div>
               </FormSection>
             </div>
-          </Form>
+          </div>
         }
         summary={
           <SummaryCard
@@ -196,19 +280,28 @@ function ElectricityPage() {
               { label: "Provider", value: provider?.name ?? "—" },
               {
                 label: "Meter type",
-                value: meterType === "prepaid" ? "Prepaid" : "Postpaid",
+                value:
+                  values.meterType === "prepaid"
+                    ? "Prepaid"
+                    : "Postpaid",
               },
-              { label: "Meter number", value: meterNumber || "—" },
+              {
+                label: "Meter number",
+                value: values.meterNumber || "—",
+              },
               { label: "Service fee", value: "₦0.00" },
             ]}
             total={formatNaira(total)}
             action={
               <Button
-                type="primary"
-                block
-                size="large"
-                disabled={!provider || total < 500 || !meterNumber}
-                onClick={() => form.submit()}
+                className="w-full"
+                size="lg"
+                disabled={
+                  !provider ||
+                  total < 500 ||
+                  !values.meterNumber
+                }
+                onClick={handleSubmit}
               >
                 Pay electricity bill
               </Button>

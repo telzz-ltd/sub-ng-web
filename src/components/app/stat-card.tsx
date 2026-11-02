@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Card, Typography } from "antd";
+
+import { Card, CardContent } from "@/components/ui/card";
 
 const tones = {
   blue: "bg-blue-50 text-blue-700",
@@ -25,28 +26,32 @@ export function StatCard({
   tone = "blue",
 }: StatCardProps) {
   return (
-    <Card className="h-full rounded-2xl border-gray-200" styles={{ body: { padding: 20 } }}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <Typography.Text type="secondary" className="text-sm">
-            {label}
-          </Typography.Text>
-          <Typography.Title level={3} className="mb-0! mt-1! break-words">
-            {value}
-          </Typography.Title>
-          {hint && (
-            <Typography.Text type="secondary" className="mt-1 block text-xs">
-              {hint}
-            </Typography.Text>
-          )}
-        </div>
+    <Card className="h-full rounded-2xl border-border">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">
+              {label}
+            </p>
 
-        <div
-          className={`flex size-11 shrink-0 items-center justify-center rounded-xl text-lg ${tones[tone]}`}
-        >
-          {icon}
+            <div className="mt-1 wrap-break-word text-2xl font-semibold tracking-tight">
+              {value}
+            </div>
+
+            {hint && (
+              <div className="mt-1 text-xs text-muted-foreground">
+                {hint}
+              </div>
+            )}
+          </div>
+
+          <div
+            className={`flex size-11 shrink-0 items-center justify-center rounded-xl text-lg ${tones[tone]}`}
+          >
+            {icon}
+          </div>
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 }

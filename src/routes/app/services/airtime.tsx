@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { App, Button, Form, Input } from "antd";
+import { toast } from "@/components/ui/toast";
 
 import { AppLayout } from "@/components/app/layout";
 import { BrandBadge } from "@/components/app/brand-badge";
@@ -10,8 +11,17 @@ import {
   ServiceLayout,
 } from "@/components/app/service-layout";
 import { SummaryCard } from "@/components/app/summary-card";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 import { networks } from "@/lib/catalog";
-import { formatNaira, formatPhone, isValidNgPhone } from "@/lib/format";
+import {
+  formatNaira,
+  formatPhone,
+  isValidNgPhone,
+} from "@/lib/format";
 
 export const Route = createFileRoute("/app/services/airtime")({
   component: AirtimePage,
@@ -25,25 +35,81 @@ type AirtimeValues = {
   amount: string;
 };
 
+type AirtimeErrors = Partial<Record<keyof AirtimeValues, string>>;
+
 function AirtimePage() {
-  const { modal } = App.useApp();
-  const [form] = Form.useForm<AirtimeValues>();
+  const [values, setValues] = useState<AirtimeValues>({
+    network: "mtn",
+    phone: "",
+    amount: "",
+  });
 
-  const networkId = Form.useWatch("network", form);
-  const phone = Form.useWatch("phone", form);
-  const amount = Number(Form.useWatch("amount", form) ?? 0);
+  const [errors, setErrors] = useState<AirtimeErrors>({});
 
-  const network = networks.find((item) => item.id === networkId);
+  const network = networks.find((item) => item.id === values.network);
+  const amount = Number(values.amount);
   const total = Number.isFinite(amount) ? amount : 0;
 
-  function handleSubmit(values: AirtimeValues) {
-    modal.success({
+  function updateField<K extends keyof AirtimeValues>(
+    field: K,
+    value: AirtimeValues[K],
+  ) {
+    setValues((current) => ({ ...current, [field]: value }));
+
+    setErrors((current) => ({
+      ...current,
+      [field]: undefined,
+      ...(field === "network" ? { amount: undefined } : {}),
+    }));
+
+    if (field === "network") {
+      setValues((current) => ({ ...current, network: value, amount: "" }));
+    }
+  }
+
+  function validate(): boolean {
+    const nextErrors: AirtimeErrors = {};
+
+    if (!values.network) {
+      nextErrors.network = "Select a network";
+    }
+
+    if (!values.phone) {
+      nextErrors.phone = "Enter the phone number";
+    } else if (!isValidNgPhone(values.phone)) {
+      nextErrors.phone = "Enter a valid Nigerian phone number";
+    }
+
+    if (!values.amount) {
+      nextErrors.amount = "Enter an amount";
+    } else if (!Number.isFinite(amount) || amount < 50) {
+      nextErrors.amount = "The minimum amount is ₦50";
+    } else if (amount > 50000) {
+      nextErrors.amount = "The maximum amount is ₦50,000";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!validate() || !network) return;
+
+    toast.add({
+      type: "success",
       title: "Airtime purchase successful",
-      content: `${formatNaira(Number(values.amount))} of ${network?.name} airtime has been sent to ${formatPhone(values.phone)}.`,
-      okText: "Done",
+      description: `${formatNaira(amount)} of ${network.name} airtime has been sent to ${formatPhone(values.phone)}.`,
     });
 
-    form.resetFields(["phone", "amount"]);
+    setValues((current) => ({
+      ...current,
+      phone: "",
+      amount: "",
+    }));
+
+    setErrors({});
   }
 
   return (
@@ -53,27 +119,16 @@ function AirtimePage() {
     >
       <ServiceLayout
         form={
-          <Form
-            form={form}
-            layout="vertical"
-            requiredMark={false}
-            initialValues={{ network: "mtn", phone: "", amount: "" }}
-            onValuesChange={(changed) => {
-              if (changed.network) form.setFieldValue("amount", "");
-            }}
-            onFinish={handleSubmit}
-          >
+          <form onSubmit={handleSubmit} noValidate>
             <ServiceFormHeader
               title="Airtime top-up"
               description="Select a network and enter the phone number to top up."
             />
 
             <div className="space-y-5">
-              <Form.Item
-                name="network"
-                label="Network"
-                rules={[{ required: true, message: "Select a network" }]}
-              >
+              <div className="space-y-2">
+                <Label>Network</Label>
+
                 <SelectionGrid
                   columns={2}
                   options={networks.map((item) => ({
@@ -86,90 +141,86 @@ function AirtimePage() {
                       />
                     ),
                   }))}
+                  value={values.network}
+                  onChange={(value: string) => updateField("network", value)}
                 />
-              </Form.Item>
 
-              <Form.Item
-                name="phone"
-                label="Phone number"
-                normalize={(value: string) =>
-                  value.replace(/\D/g, "").slice(0, 11)
-                }
-                rules={[
-                  { required: true, message: "Enter the phone number" },
-                  {
-                    validator: (_, value: string) =>
-                      !value || isValidNgPhone(value)
-                        ? Promise.resolve()
-                        : Promise.reject(
-                            new Error("Enter a valid Nigerian phone number"),
-                          ),
-                  },
-                ]}
-              >
+                {errors.network && (
+                  <p className="text-xs text-destructive">{errors.network}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone number</Label>
+
                 <Input
+                  id="phone"
                   placeholder="0801 234 5678"
                   inputMode="tel"
                   maxLength={11}
+                  value={values.phone}
+                  onChange={(event) =>
+                    updateField(
+                      "phone",
+                      event.target.value.replace(/\D/g, "").slice(0, 11),
+                    )
+                  }
+                  aria-invalid={!!errors.phone}
                 />
-              </Form.Item>
+
+                {errors.phone && (
+                  <p className="text-xs text-destructive">{errors.phone}</p>
+                )}
+              </div>
 
               <FormSection title="Amount">
                 <div className="mb-3 grid grid-cols-3 gap-2">
                   {presets.map((preset) => (
                     <Button
                       key={preset}
-                      block
-                      type={amount === preset ? "primary" : "default"}
-                      onClick={() =>
-                        form.setFieldValue("amount", String(preset))
-                      }
+                      type="button"
+                      variant={amount === preset ? "default" : "outline"}
+                      className="w-full"
+                      onClick={() => updateField("amount", String(preset))}
                     >
                       {formatNaira(preset, 0)}
                     </Button>
                   ))}
                 </div>
 
-                <Form.Item
-                  name="amount"
-                  className="mb-0!"
-                  normalize={(value: string) =>
-                    value.replace(/[^\d.]/g, "")
-                  }
-                  rules={[
-                    { required: true, message: "Enter an amount" },
-                    {
-                      validator: (_, value: string) => {
-                        const numeric = Number(value);
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Custom amount</Label>
 
-                        if (!value) return Promise.resolve();
+                  <div className="relative">
+                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
+                      ₦
+                    </span>
 
-                        if (!Number.isFinite(numeric) || numeric < 50) {
-                          return Promise.reject(
-                            new Error("The minimum amount is ₦50"),
-                          );
-                        }
+                    <Input
+                      id="amount"
+                      placeholder="Enter a custom amount"
+                      inputMode="decimal"
+                      value={values.amount}
+                      onChange={(event) =>
+                        updateField(
+                          "amount",
+                          event.target.value.replace(/[^\d.]/g, ""),
+                        )
+                      }
+                      className="pl-8"
+                      aria-invalid={!!errors.amount}
+                    />
+                  </div>
 
-                        if (numeric > 50000) {
-                          return Promise.reject(
-                            new Error("The maximum amount is ₦50,000"),
-                          );
-                        }
-
-                        return Promise.resolve();
-                      },
-                    },
-                  ]}
-                >
-                  <Input
-                    prefix="₦"
-                    placeholder="Enter a custom amount"
-                    inputMode="decimal"
-                  />
-                </Form.Item>
+                  {errors.amount && (
+                    <p className="text-xs text-destructive">
+                      {errors.amount}
+                    </p>
+                  )}
+                </div>
               </FormSection>
             </div>
-          </Form>
+          </form>
         }
         summary={
           <SummaryCard
@@ -177,7 +228,7 @@ function AirtimePage() {
               { label: "Network", value: network?.name ?? "—" },
               {
                 label: "Phone number",
-                value: phone ? formatPhone(phone) : "—",
+                value: values.phone ? formatPhone(values.phone) : "—",
               },
               { label: "Amount", value: formatNaira(total) },
               { label: "Service fee", value: "₦0.00" },
@@ -185,11 +236,16 @@ function AirtimePage() {
             total={formatNaira(total)}
             action={
               <Button
-                type="primary"
-                block
-                size="large"
-                disabled={!network || total < 50}
-                onClick={() => form.submit()}
+                type="button"
+                className="w-full"
+                size="lg"
+                disabled={!network || total < 50 || total > 50000}
+                onClick={() => {
+                  const form = document.querySelector<HTMLFormElement>(
+                    "form",
+                  );
+                  form?.requestSubmit();
+                }}
               >
                 Buy airtime
               </Button>

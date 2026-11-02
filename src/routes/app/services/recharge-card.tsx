@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { App, Button, Form, InputNumber, Typography } from "antd";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { CheckmarkCircle02Icon, Copy01Icon } from "@hugeicons/core-free-icons";
 
 import { AppLayout } from "@/components/app/layout";
 import { BrandBadge } from "@/components/app/brand-badge";
@@ -10,14 +12,16 @@ import {
   ServiceLayout,
 } from "@/components/app/service-layout";
 import { SummaryCard } from "@/components/app/summary-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/toast";
 import { networks } from "@/lib/catalog";
 import { formatNaira } from "@/lib/format";
 
 export const Route = createFileRoute("/app/services/recharge-card")({
   component: RechargeCardPage,
 });
-
-const { Text } = Typography;
 
 const denominations = [100, 200, 500, 1000, 2000, 5000];
 
@@ -34,40 +38,40 @@ function generatePin() {
 }
 
 function RechargeCardPage() {
-  const { modal } = App.useApp();
-  const [form] = Form.useForm<RechargeValues>();
+  const [values, setValues] = useState<RechargeValues>({
+    network: "mtn",
+    denomination: "100",
+    quantity: 1,
+  });
+  const [pins, setPins] = useState<string[]>([]);
+  const [showPins, setShowPins] = useState(false);
 
-  const networkId = Form.useWatch("network", form) ?? "mtn";
-  const denomination = Number(Form.useWatch("denomination", form) ?? 0);
-  const quantity = Number(Form.useWatch("quantity", form) ?? 1);
+  const network = networks.find((item) => item.id === values.network);
+  const denomination = Number(values.denomination);
+  const total = denomination * values.quantity;
 
-  const network = networks.find((item) => item.id === networkId);
-  const total = denomination * quantity;
+  function updateField<K extends keyof RechargeValues>(
+    field: K,
+    value: RechargeValues[K],
+  ) {
+    setValues((current) => ({ ...current, [field]: value }));
+  }
 
-  function handleSubmit(values: RechargeValues) {
-    const pins = Array.from({ length: values.quantity }, generatePin);
+  function handleSubmit() {
+    if (!network || denomination <= 0 || values.quantity < 1) return;
 
-    modal.success({
-      title: "Recharge cards generated",
-      width: 460,
-      content: (
-        <div className="space-y-2">
-          <Text type="secondary">
-            {values.quantity} × {formatNaira(Number(values.denomination), 0)}{" "}
-            {network?.name} PIN{values.quantity > 1 ? "s" : ""}
-          </Text>
+    setPins(Array.from({ length: values.quantity }, generatePin));
+    setShowPins(true);
+    setValues((current) => ({ ...current, denomination: "100", quantity: 1 }));
+  }
 
-          <div className="rounded-xl bg-gray-50 p-3 font-mono text-sm">
-            {pins.map((pin) => (
-              <div key={pin}>{pin}</div>
-            ))}
-          </div>
-        </div>
-      ),
-      okText: "Done",
-    });
-
-    form.setFieldsValue({ denomination: "100", quantity: 1 });
+  async function copyPins() {
+    try {
+      await navigator.clipboard.writeText(pins.join("\n"));
+      toast.add({ type: "success", title: "PINs copied" });
+    } catch {
+      toast.add({ type: "error", title: "Unable to copy PINs" });
+    }
   }
 
   return (
@@ -77,26 +81,18 @@ function RechargeCardPage() {
     >
       <ServiceLayout
         form={
-          <Form
-            form={form}
-            layout="vertical"
-            requiredMark={false}
-            initialValues={{ network: "mtn", denomination: "100", quantity: 1 }}
-            onFinish={handleSubmit}
-          >
+          <div>
             <ServiceFormHeader
               title="Buy recharge card"
               description="Pick a network, denomination and quantity."
             />
 
             <div className="space-y-5">
-              <Form.Item
-                name="network"
-                label="Network"
-                rules={[{ required: true, message: "Select a network" }]}
-              >
+              <FormSection title="Network">
                 <SelectionGrid
                   columns={2}
+                  value={values.network}
+                  onChange={(value) => updateField("network", value)}
                   options={networks.map((item) => ({
                     value: item.id,
                     label: item.name,
@@ -108,35 +104,44 @@ function RechargeCardPage() {
                     ),
                   }))}
                 />
-              </Form.Item>
+              </FormSection>
 
               <FormSection title="Denomination">
-                <Form.Item
-                  name="denomination"
-                  className="mb-0!"
-                  rules={[{ required: true, message: "Select a denomination" }]}
-                >
-                  <SelectionGrid
-                    columns={3}
-                    options={denominations.map((value) => ({
-                      value: String(value),
-                      label: formatNaira(value, 0),
-                    }))}
-                  />
-                </Form.Item>
+                <SelectionGrid
+                  columns={3}
+                  value={values.denomination}
+                  onChange={(value) => updateField("denomination", value)}
+                  options={denominations.map((value) => ({
+                    value: String(value),
+                    label: formatNaira(value, 0),
+                  }))}
+                />
               </FormSection>
 
               <FormSection title="Quantity">
-                <Form.Item
-                  name="quantity"
-                  className="mb-0!"
-                  rules={[{ required: true, message: "Enter a quantity" }]}
-                >
-                  <InputNumber min={1} max={5} className="w-full!" />
-                </Form.Item>
+                <div className="space-y-2">
+                  <Label htmlFor="quantity">Number of PINs</Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={values.quantity}
+                    onChange={(event) => {
+                      const value = Number(event.target.value);
+                      updateField(
+                        "quantity",
+                        Math.min(5, Math.max(1, value || 1)),
+                      );
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    You can generate up to 5 PINs per transaction.
+                  </p>
+                </div>
               </FormSection>
             </div>
-          </Form>
+          </div>
         }
         summary={
           <SummaryCard
@@ -146,7 +151,7 @@ function RechargeCardPage() {
                 label: "Denomination",
                 value: formatNaira(denomination, 0),
               },
-              { label: "Quantity", value: quantity },
+              { label: "Quantity", value: values.quantity },
               {
                 label: "Unit price",
                 value: formatNaira(denomination, 0),
@@ -155,11 +160,10 @@ function RechargeCardPage() {
             total={formatNaira(total)}
             action={
               <Button
-                type="primary"
-                block
-                size="large"
+                className="w-full"
+                size="lg"
                 disabled={!network || total <= 0}
-                onClick={() => form.submit()}
+                onClick={handleSubmit}
               >
                 Generate PINs
               </Button>
@@ -168,6 +172,37 @@ function RechargeCardPage() {
           />
         }
       />
+
+      {showPins && (
+        <div className="mx-auto mt-5 w-full max-w-5xl rounded-2xl border bg-card p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <HugeiconsIcon
+                  icon={CheckmarkCircle02Icon}
+                  className="size-5 text-green-600"
+                />
+                <h3 className="font-semibold">Recharge cards generated</h3>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {pins.length} recharge card{pins.length > 1 ? "s" : ""} for{" "}
+                {network?.name}.
+              </p>
+            </div>
+
+            <Button variant="outline" size="sm" onClick={copyPins}>
+              <HugeiconsIcon icon={Copy01Icon} className="size-4" />
+              Copy PINs
+            </Button>
+          </div>
+
+          <div className="space-y-2 rounded-xl bg-muted p-4 font-mono text-sm">
+            {pins.map((pin, index) => (
+              <div key={`${pin}-${index}`}>{pin}</div>
+            ))}
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }

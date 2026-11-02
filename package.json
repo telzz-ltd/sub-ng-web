@@ -1,52 +1,54 @@
 {
-  "name": "web",
-  "version": "0.1.0",
+  "name": "subs-ng-web",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --bun vite dev",
-    "build": "bun --bun vite build",
-    "preview": "bun --bun vite preview",
-    "lint": "bun lint --deny-warnings"
+    "dev": "vite dev --port 3000",
+    "generate-routes": "tsr generate",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/cssinjs": "^2.1.2",
-    "@ant-design/icons": "6.x",
-    "@ant-design/plots": "^2.6.8",
-    "@heroui/react": "^3.2.6",
-    "@heroui/styles": "^3.2.6",
-    "@hookform/resolvers": "^5.9.1",
-    "@tailwindcss/vite": "^4.3.3",
-    "@tanstack/react-form": "^1.33.5",
-    "@tanstack/react-query": "^5.104.1",
-    "@tanstack/react-router": "^1.170.46",
-    "@tanstack/react-start": "^1.169.4",
-    "antd": "^6.6.8",
-    "jotai": "^3.0.1",
-    "lucide-react": "^1.63.0",
-    "motion": "^14.6.0",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "react-hook-form": "^7.89.0",
-    "react-icons": "^5.7.0",
-    "zod": "^4.6.7"
+    "@base-ui/react": "^1.9.0",
+    "@fontsource-variable/inter": "^5.1.0",
+    "@fontsource-variable/montserrat": "^5.3.0",
+    "@hookform/resolvers": "^6.0.2",
+    "@hugeicons/core-free-icons": "^4.4.0",
+    "@hugeicons/react": "^1.1.10",
+    "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-devtools": "0.10.14",
+    "@tanstack/react-query": "^5.105.0",
+    "@tanstack/react-router": "1.170.46",
+    "@tanstack/react-router-devtools": "1.167.2",
+    "axios": "^1.21.0",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.5.1",
+    "frontend": ".",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.91.0",
+    "recharts": "3.8.0",
+    "shadcn": "^4.23.0",
+    "tw-animate-css": "^1.4.0",
+    "zod": "^4.6.7",
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^6.1.2",
+    "@tanstack/devtools-vite": "0.8.6",
+    "@tanstack/router-cli": "^1.132.0",
+    "@tanstack/router-plugin": "1.168.48",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5",
-    "vite": "^8.3.5"
+    "typescript": "^6.0.2",
+    "vite": "^8.0.0"
   },
-  "packageManager": "bun@1.3.14",
-  "ignoreScripts": [
-    "sharp",
-    "unrs-resolver"
-  ],
-  "trustedDependencies": [
-    "sharp",
-    "unrs-resolver"
-  ]
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss"
+    ]
+  }
 }

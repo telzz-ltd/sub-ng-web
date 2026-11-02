@@ -1,12 +1,13 @@
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ArrowDownOutlined,
-  CreditCardOutlined,
-  DollarOutlined,
-  FileTextOutlined,
-  PlayCircleOutlined,
-  ReadOutlined,
-  ThunderboltOutlined,
-} from "@ant-design/icons";
+  ArrowDown01Icon,
+  CreditCardIcon,
+  DollarCircleIcon,
+  FileTextIcon,
+  PlayCircleIcon,
+  BookOpen01Icon,
+  ZapIcon,
+} from "@hugeicons/core-free-icons";
 
 import type {
   TransactionCategory,
@@ -15,38 +16,41 @@ import type {
 
 const categoryStyles: Record<
   TransactionCategory,
-  { icon: typeof ThunderboltOutlined; className: string }
+  {
+    icon: typeof ZapIcon;
+    className: string;
+  }
 > = {
   funding: {
-    icon: ArrowDownOutlined,
+    icon: ArrowDown01Icon,
     className: "bg-emerald-50 text-emerald-700",
   },
   airtime: {
-    icon: CreditCardOutlined,
+    icon: CreditCardIcon,
     className: "bg-blue-50 text-blue-700",
   },
   data: {
-    icon: ThunderboltOutlined,
+    icon: ZapIcon,
     className: "bg-violet-50 text-violet-700",
   },
   electricity: {
-    icon: ThunderboltOutlined,
+    icon: ZapIcon,
     className: "bg-amber-50 text-amber-700",
   },
   "cable-tv": {
-    icon: PlayCircleOutlined,
+    icon: PlayCircleIcon,
     className: "bg-cyan-50 text-cyan-700",
   },
   exam: {
-    icon: ReadOutlined,
+    icon: BookOpen01Icon,
     className: "bg-pink-50 text-pink-700",
   },
   commission: {
-    icon: DollarOutlined,
+    icon: DollarCircleIcon,
     className: "bg-lime-50 text-lime-700",
   },
   other: {
-    icon: FileTextOutlined,
+    icon: FileTextIcon,
     className: "bg-gray-100 text-gray-600",
   },
 };
@@ -56,14 +60,13 @@ export function TransactionIcon({
 }: {
   category?: TransactionCategory;
 }) {
-  const style = categoryStyles[category];
-  const Icon = style.icon;
+  const { icon, className } = categoryStyles[category];
 
   return (
     <div
-      className={`flex size-10 shrink-0 items-center justify-center rounded-xl text-base ${style.className}`}
+      className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${className}`}
     >
-      <Icon />
+      <HugeiconsIcon icon={icon} className="size-5" />
     </div>
   );
 }

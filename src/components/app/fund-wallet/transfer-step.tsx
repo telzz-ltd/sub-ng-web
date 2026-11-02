@@ -1,7 +1,16 @@
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+    ArrowLeft01Icon,
+    Copy01Icon,
+} from "@hugeicons/core-free-icons";
 
-import { Button, Card, Flex, Typography, message } from "antd";
-import { CopyOutlined, LeftOutlined } from "@ant-design/icons";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+} from "@/components/ui/card";
 import { formatNaira } from "@/lib/format";
+import { toast } from "@/components/ui/toast";
 
 type Props = {
     amount: number;
@@ -15,114 +24,91 @@ const account = {
 };
 
 export function TransferStep({ amount, onBack }: Props) {
-    const [messageApi, contextHolder] = message.useMessage();
-
     async function copyAccountNumber() {
         try {
             await navigator.clipboard.writeText(account.number);
-            messageApi.success("Account number copied");
+            toast.add({ type: "error", title: "Account number copied" });
         } catch {
-            messageApi.error("Unable to copy account number");
+            toast.add({ type: "error", title: "Unable to copy account number" });
         }
     }
 
     return (
-        <>
-            {contextHolder}
+        <Card className="w-full max-w-xl">
+            <CardContent className="space-y-4 p-5">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="-ml-2"
+                    onClick={onBack}
+                >
+                    <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+                    Back
+                </Button>
 
-            <Card
-                className="w-full max-w-xl"
-                styles={{ body: { padding: 20 } }}
-            >
-                <Flex vertical gap={16}>
-                    <Button
-                        type="text"
-                        icon={<LeftOutlined />}
-                        className="self-start !-ml-2"
-                        onClick={onBack}
-                    >
-                        Back
-                    </Button>
+                <div>
+                    <h2 className="text-lg font-semibold">Bank transfer</h2>
+                    <p className="text-sm text-muted-foreground">
+                        Transfer money to the account below to fund your wallet.
+                    </p>
+                </div>
 
-                    <div>
-                        <Typography.Title level={4} className="!mb-1">
-                            Bank transfer
-                        </Typography.Title>
-                        <Typography.Text type="secondary" className="text-sm">
-                            Transfer money to the account below to fund your wallet.
-                        </Typography.Text>
+                <div className="rounded-lg bg-muted p-4">
+                    <p className="text-sm text-muted-foreground">
+                        Transfer amount
+                    </p>
+                    <p className="mt-1 text-2xl font-semibold">
+                        {formatNaira(amount)}
+                    </p>
+                </div>
+
+                <div className="overflow-hidden rounded-lg border">
+                    <div className="border-b px-4 py-3">
+                        <p className="text-xs text-muted-foreground">
+                            ACCOUNT NAME
+                        </p>
+                        <p className="mt-1 font-semibold">{account.name}</p>
                     </div>
 
-                    <div className="rounded-lg bg-gray-50 px-4 py-3">
-                        <Typography.Text type="secondary" className="text-sm">
-                            Transfer amount
-                        </Typography.Text>
-                        <Typography.Title level={3} className="!mb-0 !mt-1">
-                            {formatNaira(amount)}
-                        </Typography.Title>
+                    <div className="border-b px-4 py-3">
+                        <p className="text-xs text-muted-foreground">BANK</p>
+                        <p className="mt-1 font-semibold">{account.bank}</p>
                     </div>
 
-                    <div className="overflow-hidden rounded-lg border border-gray-200">
-                        <div className="border-b border-gray-100 px-4 py-3">
-                            <Typography.Text type="secondary" className="text-xs">
-                                ACCOUNT NAME
-                            </Typography.Text>
-                            <Typography.Text strong className="mt-1 block">
-                                {account.name}
-                            </Typography.Text>
+                    <div className="flex items-center justify-between gap-3 px-4 py-3">
+                        <div className="min-w-0">
+                            <p className="text-xs text-muted-foreground">
+                                ACCOUNT NUMBER
+                            </p>
+                            <p className="mt-1 text-base font-semibold">
+                                {account.number}
+                            </p>
                         </div>
 
-                        <div className="border-b border-gray-100 px-4 py-3">
-                            <Typography.Text type="secondary" className="text-xs">
-                                BANK
-                            </Typography.Text>
-                            <Typography.Text strong className="mt-1 block">
-                                {account.bank}
-                            </Typography.Text>
-                        </div>
-
-                        <Flex
-                            justify="space-between"
-                            align="center"
-                            gap={12}
-                            className="px-4 py-3"
+                        <Button
+                            variant="outline"
+                            onClick={copyAccountNumber}
                         >
-                            <div className="min-w-0">
-                                <Typography.Text type="secondary" className="text-xs">
-                                    ACCOUNT NUMBER
-                                </Typography.Text>
-                                <Typography.Text strong className="mt-1 block text-base">
-                                    {account.number}
-                                </Typography.Text>
-                            </div>
-
-                            <Button
-                                icon={<CopyOutlined />}
-                                onClick={copyAccountNumber}
-                            >
-                                Copy
-                            </Button>
-                        </Flex>
+                            <HugeiconsIcon icon={Copy01Icon} className="size-4" />
+                            Copy
+                        </Button>
                     </div>
+                </div>
 
-                    <Typography.Text type="secondary" className="text-xs">
-                        Your wallet will be credited once the transfer is confirmed.
-                    </Typography.Text>
+                <p className="text-xs text-muted-foreground">
+                    Your wallet will be credited once the transfer is confirmed.
+                </p>
 
-                    <Button
-                        type="primary"
-                        size="large"
-                        block
-                        onClick={() =>
-                            messageApi.info(
-                                "Connect this action to your payment confirmation flow."
-                            )
-                        }
-                    >
-                        I have made the payment
-                    </Button>
-                </Flex>
-            </Card>
-        </>
+                <Button
+                    size="lg"
+                    className="w-full"
+                    onClick={() =>
+                        toast.add({ title: "Connect this action to your payment confirmation flow." })
+                    }
+                >
+                    I have made the payment
+                </Button>
+            </CardContent>
+        </Card>
     );
 }

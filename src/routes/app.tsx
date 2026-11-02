@@ -1,9 +1,28 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/app')({
-  component: RouteComponent,
-})
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+} from "@tanstack/react-router";
 
-function RouteComponent() {
-  return <div><Outlet /></div>
+import { useAuthStore } from "@/stores/auth";
+
+export const Route = createFileRoute("/app")({
+  beforeLoad: () => {
+    const session = useAuthStore.getState().session;
+
+    if (!session?.token) {
+      throw redirect({ to: "/login" });
+    }
+  },
+
+  component: AppLayout,
+});
+
+function AppLayout() {
+  return (
+    <main>
+      <Outlet />
+    </main>
+  );
 }

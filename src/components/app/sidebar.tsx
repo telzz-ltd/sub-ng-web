@@ -1,234 +1,266 @@
-import {
-  AppstoreOutlined,
-  BellOutlined,
-  CreditCardOutlined,
-  DashboardOutlined,
-  DollarOutlined,
-  FileTextOutlined,
-  MobileOutlined,
-  PlayCircleOutlined,
-  SettingOutlined,
-  SwapOutlined,
-  ThunderboltOutlined,
-  TransactionOutlined,
-  WalletOutlined,
-  WifiOutlined,
-} from "@ant-design/icons";
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  Avatar,
-  ConfigProvider,
-  Layout,
-  Menu,
-  Typography,
-  theme,
-} from "antd";
-import type { MenuProps } from "antd";
 
-const { Sider } = Layout;
-const { Text } = Typography;
+import {
+  AppWindowIcon,
+  ArrowLeftRightIcon,
+  BookOpenTextIcon,
+  CreditCardIcon,
+  FileTextIcon,
+  LayoutDashboardIcon,
+  SettingsIcon,
+  SmartphoneIcon,
+  TagIcon,
+  TrophyIcon,
+  TvIcon,
+  WalletIcon,
+  WifiIcon,
+  ZapIcon
+} from "@hugeicons/core-free-icons";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 const navigation = [
-  { key: "/app", label: "Overview", icon: DashboardOutlined },
-  { key: "/app/wallet", label: "Wallet", icon: WalletOutlined },
   {
-    key: "/app/transactions",
-    label: "Transactions",
-    icon: TransactionOutlined,
+    title: "Overview",
+    url: "/app",
+    icon: LayoutDashboardIcon,
   },
   {
-    key: "/app/commission",
-    label: "Commissions",
-    icon: DollarOutlined,
+    title: "Transactions",
+    url: "/app/transactions",
+    icon: WalletIcon,
   },
   {
-    label: "Services",
-    children: [
-      {
-        key: "/app/services",
-        label: "All services",
-        icon: AppstoreOutlined,
-      },
-      { key: "/app/services/airtime", label: "Airtime", icon: MobileOutlined },
-      { key: "/app/services/data", label: "Data", icon: WifiOutlined },
-      {
-        key: "/app/services/recharge-card",
-        label: "Recharge cards",
-        icon: CreditCardOutlined,
-      },
-      {
-        key: "/app/services/airtime-to-cash",
-        label: "Airtime to cash",
-        icon: SwapOutlined,
-      },
-      {
-        key: "/app/services/cable-tv",
-        label: "Cable TV",
-        icon: PlayCircleOutlined,
-      },
-      {
-        key: "/app/services/electricity",
-        label: "Electricity",
-        icon: ThunderboltOutlined,
-      },
-      {
-        key: "/app/services/exam-card",
-        label: "Exam cards",
-        icon: FileTextOutlined,
-      },
-    ],
+    title: "Beneficiaries",
+    url: "/app/beneficiaries",
+    icon: BookOpenTextIcon,
   },
   {
-    key: "/app/notifications",
-    label: "Notifications",
-    icon: BellOutlined,
+    title: "Rewards",
+    url: "/app/rewards",
+    icon: TrophyIcon,
   },
 ];
 
-function createMenuItems(
-  entries: typeof navigation,
-): MenuProps["items"] {
-  return entries.map((entry) => {
-    if ("children" in entry) {
-      return {
-        key: entry.label,
-        label: entry.label,
-        type: "group" as const,
-        children: createMenuItems(entry.children as typeof navigation),
-      };
-    }
+const services = [
+  {
+    title: "All services",
+    url: "/app/services",
+    icon: AppWindowIcon,
+  },
+  {
+    title: "Airtime",
+    url: "/app/services/airtime",
+    icon: SmartphoneIcon,
+  },
+  {
+    title: "Data",
+    url: "/app/services/data",
+    icon: WifiIcon,
+  },
+  {
+    title: "Recharge cards",
+    url: "/app/services/recharge-card",
+    icon: CreditCardIcon,
+  },
+  {
+    title: "Airtime to cash",
+    url: "/app/services/airtime-to-cash",
+    icon: ArrowLeftRightIcon,
+  },
+  {
+    title: "Cable TV",
+    url: "/app/services/cable-tv",
+    icon: TvIcon,
+  },
+  {
+    title: "Electricity",
+    url: "/app/services/electricity",
+    icon: ZapIcon,
+  },
+  {
+    title: "Exam cards",
+    url: "/app/services/exam-card",
+    icon: FileTextIcon,
+  },
+];
 
-    const Icon = entry.icon;
+const secondaryNavigation = [
+  {
+    title: "Pricing",
+    url: "/app/pricing",
+    icon: TagIcon,
+  },
+  // {
+  // title: "Notifications",
+  // url: "/app/notifications",
+  // icon: BellIcon,
+  // },
+];
 
-    return {
-      key: entry.key,
-      icon: <Icon />,
-      label: <Link to={entry.key}>{entry.label}</Link>,
-    };
-  });
-}
-
-function getRoutes(entries: typeof navigation): string[] {
-  return entries.flatMap((entry) =>
-    "children" in entry ? getRoutes(entry.children as typeof navigation) : [entry.key],
-  );
-}
-
-const menuItems = createMenuItems(navigation);
-const routes = getRoutes(navigation).sort((a, b) => b.length - a.length);
-
-export function AppSidebar({
-  collapsed,
-  onNavigate,
-}: {
-  collapsed: boolean;
-  onNavigate?: () => void;
-}) {
+export function AppSidebar({ onNavigate }: { onNavigate?: () => void; }) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
 
-  const selectedKey =
-    routes.find(
-      (route) =>
-        pathname === route ||
-        (route !== "/app" && pathname.startsWith(`${route}/`)),
-    ) ?? "/app";
+  const isActive = (url: string) => {
+    if (url === "/app") {
+      return pathname === "/app";
+    }
+
+    return pathname === url || pathname.startsWith(`${url}/`);
+  };
 
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: theme.defaultAlgorithm,
-        token: {
-          colorPrimary: "#2563eb",
-          borderRadius: 10,
-          controlHeight: 38,
-          fontSize: 14,
-        },
-        components: {
-          Menu: {
-            itemHeight: 42,
-            itemBorderRadius: 10,
-            itemMarginBlock: 3,
-            itemMarginInline: 0,
-            itemPaddingInline: 12,
-            itemColor: "#64748b",
-            itemSelectedColor: "#2563eb",
-            itemSelectedBg: "#eff6ff",
-            itemHoverBg: "#f8fafc",
-            itemHoverColor: "#2563eb",
-            groupTitleColor: "#94a3b8",
-            activeBarWidth: 0,
-            iconSize: 18,
-          },
-        },
-      }}
-    >
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
-        width={256}
-        collapsedWidth={80}
-        theme="light"
-        className="sticky top-0 inset-s-0 h-svh overflow-y-auto border-e border-border bg-background"
-      >
-        <div className="flex min-h-full flex-col">
-          <Link
-            to="/app"
-            onClick={onNavigate}
-            className="flex h-18 shrink-0 items-center px-4"
-          >
-            <img
-              src="/logo.png"
-              width={collapsed ? 36 : 120}
-              height={40}
-              alt="Subs.NG"
-              className="max-w-full object-contain"
+    <Sidebar>
+      <SidebarHeader className="h-18 justify-center px-4">
+        <Link to="/app" className="flex items-center">
+          <img
+            src="/logo.png"
+            width={120}
+            height={40}
+            alt="Subs.NG"
+            className="max-h-10 max-w-full object-contain"
+          />
+        </Link>
+      </SidebarHeader>
+
+      <SidebarContent>
+        {/* Main navigation */}
+        <SidebarGroup>
+          <SidebarGroupLabel> WORKSPACE</SidebarGroupLabel>
+
+          <SidebarMenu className="gap-1">
+            {navigation.map((item) => {
+              const active = isActive(item.url);
+
+              return (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton
+                    data-active={active}
+                    tooltip={item.title}
+                    className="h-10 rounded-lg px-3 data-[active=true]:bg-primary/10 data-[active=true]:font-medium data-[active=true]:text-primary"
+                    render={(props) => (
+                      <Link
+                        to={item.url}
+                        onClick={onNavigate}
+                        {...props}
+                      >
+                        <HugeiconsIcon icon={item.icon} className="size-4.5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    )}
+                  />
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        {/* Services */}
+        <SidebarGroup>
+          <SidebarGroupLabel> SERVICES </SidebarGroupLabel>
+
+          <SidebarMenu>
+            {services.map((item) => {
+              const active = isActive(item.url);
+
+              return (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton
+                    data-active={active}
+                    tooltip={item.title}
+                    className="h-10 rounded-lg px-3 data-[active=true]:bg-primary/10 data-[active=true]:font-medium data-[active=true]:text-primary"
+                    render={(props) => (
+                      <Link
+                        to={item.url}
+                        onClick={onNavigate}
+                        {...props}
+                      >
+                        <HugeiconsIcon icon={item.icon} className="size-4.5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    )}
+                  />
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        {/* Other navigation */}
+        <SidebarGroup>
+          <SidebarGroupLabel> OTHERS </SidebarGroupLabel>
+          <SidebarMenu>
+            {secondaryNavigation.map((item) => {
+              const active = isActive(item.url);
+
+              return (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton
+                    data-active={active}
+                    tooltip={item.title}
+                    className="h-10 rounded-lg px-3 data-active:bg-primary/10 data-[active=true]:font-medium data-[active=true]:text-primary"
+                    render={(props) => (
+                      <Link
+                        {...props}
+                        to={item.url}
+                        onClick={onNavigate}
+                      >
+                        <HugeiconsIcon icon={item.icon} className="size-4.5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    )}
+                  />
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+
+      {/* Account settings */}
+      <SidebarFooter className="border-t p-3">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              data-active={isActive("/app/settings")}
+              className="h-auto min-h-12 rounded-lg px-2 py-2"
+              render={(props) => (
+                <Link
+                  {...props}
+                  to="/app/settings"
+                  onClick={onNavigate}
+                >
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <HugeiconsIcon icon={SettingsIcon} className="size-5" />
+                  </div>
+
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate text-sm font-medium">
+                      Account Settings
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      Manage your account
+                    </span>
+                  </div>
+                </Link>
+              )}
             />
-          </Link>
-
-          <nav className="px-3 pb-3">
-            {!collapsed && (
-              <Text className="mb-2! block! px-3! text-xs! font-medium! tracking-wider! text-muted!">
-                WORKSPACE
-              </Text>
-            )}
-
-            <Menu
-              mode="inline"
-              inlineCollapsed={collapsed}
-              selectedKeys={[selectedKey]}
-              items={menuItems}
-              onClick={onNavigate}
-              className="border-e-0! bg-transparent!"
-            />
-          </nav>
-
-          <Link
-            to="/app/settings"
-            onClick={onNavigate}
-            className="mt-auto flex shrink-0 items-center gap-3 border-t border-border p-4 transition-colors hover:bg-surface-muted"
-          >
-            <Avatar
-              size={collapsed ? 40 : 42}
-              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
-              icon={<SettingOutlined />}
-            />
-
-            {!collapsed && (
-              <div className="flex min-w-0 flex-1 flex-col">
-                <Text strong className="truncate">
-                  Account Settings
-                </Text>
-                <Text type="secondary" className="truncate text-xs">
-                  Manage your account
-                </Text>
-              </div>
-            )}
-          </Link>
-        </div>
-      </Sider>
-    </ConfigProvider>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 }

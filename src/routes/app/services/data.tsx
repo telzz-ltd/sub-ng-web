@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { App, Button, Form, Input, Typography } from "antd";
+import { toast } from "@/components/ui/toast";
 
 import { AppLayout } from "@/components/app/layout";
 import { BrandBadge } from "@/components/app/brand-badge";
@@ -10,14 +11,21 @@ import {
   ServiceLayout,
 } from "@/components/app/service-layout";
 import { SummaryCard } from "@/components/app/summary-card";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 import { dataPlans, networks } from "@/lib/catalog";
-import { formatNaira, formatPhone, isValidNgPhone } from "@/lib/format";
+import {
+  formatNaira,
+  formatPhone,
+  isValidNgPhone,
+} from "@/lib/format";
 
 export const Route = createFileRoute("/app/services/data")({
   component: DataPage,
 });
-
-const { Text } = Typography;
 
 type DataValues = {
   network: string;
@@ -25,29 +33,75 @@ type DataValues = {
   plan: string;
 };
 
+type FormErrors = Partial<Record<keyof DataValues, string>>;
+
+const initialValues: DataValues = {
+  network: "mtn",
+  phone: "",
+  plan: "",
+};
+
 function DataPage() {
-  const { modal } = App.useApp();
-  const [form] = Form.useForm<DataValues>();
+  const [values, setValues] = useState(initialValues);
+  const [errors, setErrors] = useState<FormErrors>({});
 
-  const networkId = Form.useWatch("network", form) ?? "mtn";
-  const phone = Form.useWatch("phone", form);
-  const planId = Form.useWatch("plan", form);
-
-  const network = networks.find((item) => item.id === networkId);
-  const plans = dataPlans[networkId] ?? [];
-  const plan = plans.find((item) => item.id === planId);
+  const network = networks.find((item) => item.id === values.network);
+  const plans = dataPlans[values.network] ?? [];
+  const plan = plans.find((item) => item.id === values.plan);
   const total = plan?.price ?? 0;
 
-  function handleSubmit(values: DataValues) {
-    if (!plan) return;
+  function updateField<K extends keyof DataValues>(
+    field: K,
+    value: DataValues[K],
+  ) {
+    setValues((current) => ({
+      ...current,
+      [field]: value,
+      ...(field === "network" ? { plan: "" } : {}),
+    }));
 
-    modal.success({
+    setErrors((current) => ({
+      ...current,
+      [field]: undefined,
+      ...(field === "network" ? { plan: undefined } : {}),
+    }));
+  }
+
+  function validate() {
+    const nextErrors: FormErrors = {};
+
+    if (!values.network) {
+      nextErrors.network = "Select a network";
+    }
+
+    if (!values.phone) {
+      nextErrors.phone = "Enter the phone number";
+    } else if (!isValidNgPhone(values.phone)) {
+      nextErrors.phone = "Enter a valid Nigerian phone number";
+    }
+
+    if (!values.plan) {
+      nextErrors.plan = "Select a data plan";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
+
+  function handleSubmit() {
+    if (!validate() || !plan) return;
+
+    toast.add({
+      type: "success",
       title: "Data purchase successful",
-      content: `${plan.size} (${plan.validity}) of ${network?.name} data has been sent to ${formatPhone(values.phone)}.`,
-      okText: "Done",
+      description: `${plan.size} (${plan.validity}) of ${network?.name} data has been sent to ${formatPhone(values.phone)}.`,
     });
 
-    form.resetFields(["phone", "plan"]);
+    setValues((current) => ({
+      ...current,
+      phone: "",
+      plan: "",
+    }));
   }
 
   return (
@@ -57,96 +111,89 @@ function DataPage() {
     >
       <ServiceLayout
         form={
-          <Form
-            form={form}
-            layout="vertical"
-            requiredMark={false}
-            initialValues={{ network: "mtn", phone: "", plan: "" }}
-            onValuesChange={(changed) => {
-              if (changed.network) form.setFieldValue("plan", "");
-            }}
-            onFinish={handleSubmit}
-          >
+          <div className="space-y-5">
             <ServiceFormHeader
               title="Data bundle"
               description="Select a network, enter the phone number and pick a plan."
             />
 
-            <div className="space-y-5">
-              <Form.Item
-                name="network"
-                label="Network"
-                rules={[{ required: true, message: "Select a network" }]}
-              >
-                <SelectionGrid
-                  columns={2}
-                  options={networks.map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                    leading: (
-                      <BrandBadge
-                        label={item.short}
-                        className={`${item.background} ${item.foreground}`}
-                      />
-                    ),
-                  }))}
-                />
-              </Form.Item>
+            <div className="space-y-2">
+              <Label>Network</Label>
 
-              <Form.Item
-                name="phone"
-                label="Phone number"
-                normalize={(value: string) =>
-                  value.replace(/\D/g, "").slice(0, 11)
-                }
-                rules={[
-                  { required: true, message: "Enter the phone number" },
-                  {
-                    validator: (_, value: string) =>
-                      !value || isValidNgPhone(value)
-                        ? Promise.resolve()
-                        : Promise.reject(
-                            new Error("Enter a valid Nigerian phone number"),
-                          ),
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="0801 234 5678"
-                  inputMode="tel"
-                  maxLength={11}
-                />
-              </Form.Item>
+              <SelectionGrid
+                columns={2}
+                value={values.network}
+                onChange={(value: string) => updateField("network", value)}
+                options={networks.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                  leading: (
+                    <BrandBadge
+                      label={item.short}
+                      className={`${item.background} ${item.foreground}`}
+                    />
+                  ),
+                }))}
+              />
 
-              <FormSection
-                title="Data plan"
-                extra={
-                  <Text type="secondary" className="text-xs">
-                    {plans.length} plans available
-                  </Text>
-                }
-              >
-                <Form.Item
-                  name="plan"
-                  className="mb-0!"
-                  rules={[{ required: true, message: "Select a data plan" }]}
-                >
-                  <SelectionGrid
-                    options={plans.map((item) => ({
-                      value: item.id,
-                      label: item.size,
-                      description: item.validity,
-                      trailing: (
-                        <Text strong className="shrink-0 text-xs text-blue-700">
-                          {formatNaira(item.price, 0)}
-                        </Text>
-                      ),
-                    }))}
-                  />
-                </Form.Item>
-              </FormSection>
+              {errors.network && (
+                <p className="text-sm text-destructive">{errors.network}</p>
+              )}
             </div>
-          </Form>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone number</Label>
+
+              <Input
+                id="phone"
+                placeholder="0801 234 5678"
+                inputMode="tel"
+                maxLength={11}
+                value={values.phone}
+                onChange={(event) =>
+                  updateField(
+                    "phone",
+                    event.target.value.replace(/\D/g, "").slice(0, 11),
+                  )
+                }
+                aria-invalid={!!errors.phone}
+              />
+
+              {errors.phone && (
+                <p className="text-sm text-destructive">{errors.phone}</p>
+              )}
+            </div>
+
+            <FormSection
+              title="Data plan"
+              extra={
+                <span className="text-xs text-muted-foreground">
+                  {plans.length} plans available
+                </span>
+              }
+            >
+              <SelectionGrid
+                value={values.plan}
+                onChange={(value: string) => updateField("plan", value)}
+                options={plans.map((item) => ({
+                  value: item.id,
+                  label: item.size,
+                  description: item.validity,
+                  trailing: (
+                    <span className="shrink-0 text-xs font-semibold text-primary">
+                      {formatNaira(item.price, 0)}
+                    </span>
+                  ),
+                }))}
+              />
+
+              {errors.plan && (
+                <p className="mt-2 text-sm text-destructive">
+                  {errors.plan}
+                </p>
+              )}
+            </FormSection>
+          </div>
         }
         summary={
           <SummaryCard
@@ -154,7 +201,7 @@ function DataPage() {
               { label: "Network", value: network?.name ?? "—" },
               {
                 label: "Phone number",
-                value: phone ? formatPhone(phone) : "—",
+                value: values.phone ? formatPhone(values.phone) : "—",
               },
               {
                 label: "Data plan",
@@ -165,11 +212,10 @@ function DataPage() {
             total={formatNaira(total)}
             action={
               <Button
-                type="primary"
-                block
-                size="large"
-                disabled={!plan || !phone}
-                onClick={() => form.submit()}
+                className="w-full"
+                size="lg"
+                disabled={!plan || !values.phone}
+                onClick={handleSubmit}
               >
                 Buy data
               </Button>

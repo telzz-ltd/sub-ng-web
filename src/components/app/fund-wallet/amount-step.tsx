@@ -1,5 +1,13 @@
-
-import { Button, Card, Flex, Input, Typography } from "antd";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatNaira } from "@/lib/format";
 
 const presets = [1000, 2000, 5000, 10000, 20000, 50000];
@@ -21,9 +29,7 @@ export function AmountStep({
         Number.isFinite(numericAmount) &&
         numericAmount >= 1000;
 
-
     function handleChange(value: string) {
-        // Allow digits and a single decimal point.
         const cleaned = value.replace(/[^\d.]/g, "");
         const decimalIndex = cleaned.indexOf(".");
 
@@ -36,27 +42,28 @@ export function AmountStep({
         onAmountChange(normalized);
     }
 
-
     return (
-        <Card className="w-full max-w-xl" styles={{ body: { padding: 24 } }}>
-            <Flex vertical gap={24}>
-                <div>
-                    <Typography.Title level={4} className="!mb-1">
-                        Add money
-                    </Typography.Title>
-                    <Typography.Text type="secondary">
-                        Choose how much you want to add to your wallet.
-                    </Typography.Text>
-                </div>
+        <Card className="w-full max-w-xl">
+            <CardHeader>
+                <CardTitle>Add money</CardTitle>
+                <CardDescription>
+                    Choose how much you want to add to your wallet.
+                </CardDescription>
+            </CardHeader>
 
+            <CardContent className="space-y-6">
                 <div>
-                    <Typography.Text strong>Choose an amount</Typography.Text>
+                    <Label>Choose an amount</Label>
+
                     <div className="mt-3 grid grid-cols-3 gap-2">
                         {presets.map((preset) => (
                             <Button
                                 key={preset}
-                                block
-                                type={amount === String(preset) ? "primary" : "default"}
+                                variant={
+                                    amount === String(preset)
+                                        ? "default"
+                                        : "outline"
+                                }
                                 onClick={() => onAmountChange(String(preset))}
                             >
                                 {formatNaira(preset, 0)}
@@ -66,48 +73,59 @@ export function AmountStep({
                 </div>
 
                 <div>
-                    <Typography.Text strong>Or enter an amount</Typography.Text>
-                    <Input
-                        className="mt-3"
-                        size="large"
-                        prefix="₦"
-                        value={amount}
-                        onChange={(event) => handleChange(event.target.value)}
-                        inputMode="decimal"
-                        placeholder="0.00"
-                        aria-label="Amount to add"
-                        onPressEnter={() => isValid && onContinue()}
-                    />
+                    <Label htmlFor="funding-amount">
+                        Or enter an amount
+                    </Label>
+
+                    <div className="relative mt-3">
+                        <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                            ₦
+                        </span>
+
+                        <Input
+                            id="funding-amount"
+                            className="h-11 pl-8"
+                            value={amount}
+                            onChange={(event) => handleChange(event.target.value)}
+                            inputMode="decimal"
+                            placeholder="0.00"
+                            aria-label="Amount to add"
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter" && isValid) {
+                                    onContinue();
+                                }
+                            }}
+                        />
+                    </div>
+
                     {amount !== "" && !isValid && (
-                        <Typography.Text type="danger" className="mt-2 block">
+                        <p className="mt-2 text-sm text-destructive">
                             Enter an amount of at least ₦1,000.
-                        </Typography.Text>
+                        </p>
                     )}
                 </div>
 
-                <div className="rounded-lg bg-gray-50 p-4">
-                    <Flex justify="space-between" align="center">
-                        <Typography.Text type="secondary">
-                            Amount to fund
-                        </Typography.Text>
-                        <Typography.Title level={4} className="!mb-0">
-                            {amount !== "" && Number.isFinite(numericAmount)
-                                ? formatNaira(numericAmount)
-                                : formatNaira(0)}
-                        </Typography.Title>
-                    </Flex>
+                <div className="flex items-center justify-between rounded-lg bg-muted p-4">
+                    <span className="text-sm text-muted-foreground">
+                        Amount to fund
+                    </span>
+
+                    <span className="text-xl font-semibold">
+                        {amount !== "" && Number.isFinite(numericAmount)
+                            ? formatNaira(numericAmount)
+                            : formatNaira(0)}
+                    </span>
                 </div>
 
                 <Button
-                    type="primary"
-                    size="large"
-                    block
+                    className="w-full"
+                    size="lg"
                     disabled={!isValid}
                     onClick={onContinue}
                 >
                     Continue
                 </Button>
-            </Flex>
+            </CardContent>
         </Card>
     );
 }

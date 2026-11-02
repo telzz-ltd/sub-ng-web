@@ -1,26 +1,35 @@
-
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { App, Button, Form, Input, Typography } from "antd";
-import {
-  UserOutlined,
-  MailOutlined,
-  LockOutlined,
-  ArrowRightOutlined,
-} from "@ant-design/icons";
+import { FormField, SubmitButton } from "@/components/form/form-field";
+import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
+import { toast } from "@/components/ui/toast";
+import { getApiErrorMessage, register } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AtIcon, LockPasswordIcon, UserIcon } from "@hugeicons/core-free-icons";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const registerSchema = z
   .object({
-    name: z.string().trim().min(2, "Enter your full name"),
+    name: z
+      .string()
+      .trim()
+      .min(2, "Enter your full name")
+      .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces"),
     email: z.email("Enter a valid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Confirm your password"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(72, "Password must be at most 72 characters"),
+    // confirmPassword: z.string().min(1, "Confirm your password"),
+    acceptTerms: z.boolean().refine((value) => value, {
+      message: "You must accept the Terms & Conditions",
+    }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+// .refine((data) => data.password === data.confirmPassword, {
+//   message: "Passwords do not match",
+//   path: ["confirmPassword"],
+// });
 
 type RegisterValues = z.infer<typeof registerSchema>;
 
@@ -29,145 +38,99 @@ export const Route = createFileRoute("/_auth/register")({
 });
 
 function RegisterPage() {
-  const [isPending, setIsPending] = useState(false);
-  const { message } = App.useApp();
-  const [form] = Form.useForm<RegisterValues>();
+  const navigate = useNavigate();
+
+  const setAuthSession = useAuthStore((s) => s.setSession);
+
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      // confirmPassword: "",
+      acceptTerms: false,
+    },
+  });
 
   async function handleSubmit(values: RegisterValues) {
-    const result = registerSchema.safeParse(values);
-
-    if (!result.success) return;
-
-    setIsPending(true);
-
     try {
-      console.log(result.data);
-      message.info("Connect your registration handler to continue.");
-    } catch {
-      message.error("Unable to create your account. Please try again.");
-    } finally {
-      setIsPending(false);
+      const response = await register({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        acceptTerms: values.acceptTerms,
+      });
+      setAuthSession(response.data);
+      toast.add({ type: "success", description: response.message });
+      await navigate({ to: "/verify-email" });
+    } catch (error) {
+      toast.add({ type: "error", description: getApiErrorMessage(error) });
     }
   }
 
   return (
-    <div>
-      <header className="mb-5">
-        <Typography.Title level={3} className="!mb-1 !mt-0 text-2xl!">
-          Create an account
-        </Typography.Title>
-        <Typography.Text type="secondary">
-          Get started with your Subs.NG account.
-        </Typography.Text>
-      </header>
+    <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <FieldGroup>
+        <FieldSet>
+          <FieldLegend className="text-2xl!">Create your account</FieldLegend>
+          <FieldDescription>Start paying for airtime, data and bills in seconds.</FieldDescription>
 
-      <Form
-        form={form}
-        layout="vertical"
-        requiredMark={false}
-        onFinish={handleSubmit}
-        initialValues={{
-          name: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-        }}
-      >
-        <Form.Item
-          name="name"
-          label="Full name"
-          className="!mb-3"
-          rules={[{ required: true, whitespace: true, message: "Enter your full name" },
-          { min: 2, message: "Name must be at least 2 characters" }]}
-        >
-          <Input
-            size="large"
-            prefix={<UserOutlined className="text-gray-400" />}
-            placeholder="Your full name"
-            autoComplete="name"
-          />
-        </Form.Item>
+          <FieldGroup className="gap-4">
+            <FormField
+              icon={UserIcon}
+              control={form.control}
+              name="name"
+              label="Full Name"
+              placeholder="Baba Balogun"
+              inputProps={{ autoComplete: "name" }}
+            />
+            <FormField
+              icon={AtIcon}
+              control={form.control}
+              name="email"
+              type="email"
+              label="Email Address"
+              placeholder="name@example.com"
+              inputProps={{ autoComplete: "email" }}
+            />
+            <FormField
+              control={form.control}
+              icon={LockPasswordIcon}
+              name="password"
+              type="password"
+              label="Password"
+              placeholder="Create a password"
+              inputProps={{ autoComplete: "new-password" }}
+            />
+            {/* <FormField
+              control={form.control}
+              icon={LockPasswordIcon}
+              name="confirmPassword"
+              type="password"
+              label="Confirm Password"
+              placeholder="Confirm your password"
+              inputProps={{ autoComplete: "new-password" }}
+            /> */}
 
-        <Form.Item
-          name="email"
-          label="Email address"
-          className="!mb-3"
-          rules={[
-            { required: true, message: "Enter your email address" },
-            { type: "email", message: "Enter a valid email address" },
-          ]}
-        >
-          <Input
-            size="large"
-            prefix={<MailOutlined className="text-gray-400" />}
-            placeholder="name@example.com"
-            autoComplete="email"
-          />
-        </Form.Item>
+            <FormField
+              control={form.control}
+              name="acceptTerms"
+              type="checkbox"
+              label="Accept Terms & Conditions"
+            />
 
-        <Form.Item
-          name="password"
-          label="Password"
-          className="!mb-3"
-          rules={[
-            { required: true, message: "Enter a password" },
-            { min: 8, message: "Password must be at least 8 characters" },
-          ]}
-        >
-          <Input.Password
-            size="large"
-            prefix={<LockOutlined className="text-gray-400" />}
-            placeholder="Create a password"
-            autoComplete="new-password"
-          />
-        </Form.Item>
+            <SubmitButton loading={form.formState.isSubmitting} text="Create account" size="lg" />
+          </FieldGroup>
+        </FieldSet>
 
-        <Form.Item
-          name="confirmPassword"
-          label="Confirm password"
-          className="!mb-4"
-          dependencies={["password"]}
-          rules={[
-            { required: true, message: "Confirm your password" },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                if (!value || getFieldValue("password") === value) {
-                  return Promise.resolve();
-                }
-                return Promise.reject(new Error("Passwords do not match"));
-              },
-            }),
-          ]}
-        >
-          <Input.Password
-            size="large"
-            prefix={<LockOutlined className="text-gray-400" />}
-            placeholder="Confirm your password"
-            autoComplete="new-password"
-          />
-        </Form.Item>
-
-        <Button
-          htmlType="submit"
-          type="primary"
-          size="large"
-          block
-          loading={isPending}
-          icon={<ArrowRightOutlined />}
-          iconPlacement="end"
-        >
-          Create account
-        </Button>
-      </Form>
-
-      <div className="mt-5 text-center text-sm">
-        <Typography.Text type="secondary">
-          Already have an account?{" "}
-        </Typography.Text>
-        <Link to="/login" className="font-medium text-blue-600">
-          Sign in
-        </Link>
-      </div>
-    </div>
+        <p className="mt-5 text-center text-sm">
+          <span> Already have an account? </span>
+          <Link to="/login" className="font-medium text-primary">
+            Sign in
+          </Link>
+        </p>
+      </FieldGroup>
+    </form>
   );
 }

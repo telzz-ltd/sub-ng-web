@@ -1,119 +1,93 @@
-
+import { toast } from "@/components/ui/toast";
 import {
-    LogoutOutlined,
-    SettingOutlined,
-    UserOutlined,
-    SafetyCertificateOutlined,
-} from "@ant-design/icons";
-import { Avatar, Button, Dropdown, Flex, Typography, message } from "antd";
+    Logout01Icon,
+    Settings01Icon,
+    Shield01Icon,
+    UserIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "@tanstack/react-router";
-import { useAuth } from "@/components/provider";
-import type { MenuProps } from "antd";
 
-function getInitials(name: string) {
-    return name
-        .split(" ")
-        .map((part) => part[0])
-        .filter(Boolean)
-        .slice(0, 2)
-        .join("")
-        .toUpperCase();
-}
+import { getAuthSession } from "@/stores/auth";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function UserMenu() {
-    const [messageApi, contextHolder] = message.useMessage();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const user = getAuthSession()?.user;
 
-    const name = user?.name ?? "Guest";
-    const email = user?.email ?? "";
+    const initials = user?.name.split(" ").map(e => e[0]).join("")
 
-    const items: MenuProps["items"] = [
-        {
-            key: "profile",
-            icon: <UserOutlined />,
-            label: "My profile",
-            onClick: () => {
-                void navigate({ to: "/app/settings" });
-            },
-        },
-        {
-            key: "settings",
-            icon: <SettingOutlined />,
-            label: "Account settings",
-            onClick: () => {
-                void navigate({ to: "/app/settings" });
-            },
-        },
-        {
-            key: "security",
-            icon: <SafetyCertificateOutlined />,
-            label: "Security",
-            onClick: () => {
-                void navigate({ to: "/app/settings" });
-            },
-        },
-        { type: "divider" },
-        {
-            key: "logout",
-            icon: <LogoutOutlined />,
-            danger: true,
-            label: "Sign out",
-            onClick: () => {
-                messageApi.success("Signed out");
-                void navigate({ to: "/login" });
-            },
-        },
-    ];
+    const handleLogout = () => {
+        toast.add({ type: "success", description: "Signed out" });
+        void navigate({ to: "/login" });
+    };
 
     return (
-        <>
-            {contextHolder}
+        <DropdownMenu>
+            <DropdownMenuTrigger>
+                <Avatar size="lg">
+                    <AvatarFallback className="bg-blue-100 text-lg text-primary">
+                        {initials}
+                    </AvatarFallback>
+                </Avatar>
+            </DropdownMenuTrigger>
 
-            <Dropdown
-                trigger={["click"]}
-                placement="bottomRight"
-                menu={{ items }}
-                popupRender={(menu) => (
-                    <div className="w-[260px] overflow-hidden rounded-xl border border-gray-100 bg-white shadow-xl">
-                        <div className="border-b border-gray-100 px-4 py-4">
-                            <Flex align="center" gap={3}>
-                                <Avatar
-                                    size={44}
-                                    className="!bg-blue-100 !text-blue-700"
-                                >
-                                    {getInitials(name)}
-                                </Avatar>
-
-                                <div className="min-w-0">
-                                    <Typography.Text strong className="block truncate text-sm!">
-                                        {name}
-                                    </Typography.Text>
-                                    <Typography.Text
-                                        type="secondary"
-                                        className="block truncate text-xs!"
-                                    >
-                                        {email}
-                                    </Typography.Text>
-                                </div>
-                            </Flex>
-                        </div>
-
-                        <div className="p-1.5">{menu}</div>
-                    </div>
-                )}
-            >
-                <Button
-                    type="text"
-                    shape="circle"
-                    aria-label="Open user menu"
-                    className="!flex !h-9 !w-9 !items-center !justify-center !p-0"
-                >
-                    <Avatar size={34} className="!bg-blue-100 !text-blue-700">
-                        {getInitials(name)}
+            <DropdownMenuContent className="w-60 rounded-xl p-1.5">
+                <div className="flex items-center gap-3 px-2.5 py-3">
+                    <Avatar className="size-11">
+                        <AvatarFallback className="bg-blue-100 text-lg text-primary">
+                            {initials}
+                        </AvatarFallback>
                     </Avatar>
-                </Button>
-            </Dropdown>
-        </>
+
+                    <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">{user?.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                            {user?.email}
+                        </p>
+                    </div>
+                </div>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                    onClick={() => void navigate({ to: "/app/settings" })}
+                >
+                    <HugeiconsIcon icon={UserIcon} className="size-4" />
+                    My profile
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                    onClick={() => void navigate({ to: "/app/settings" })}
+                >
+                    <HugeiconsIcon icon={Settings01Icon} className="size-4" />
+                    Account settings
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                    onClick={() => void navigate({ to: "/app/settings" })}
+                >
+                    <HugeiconsIcon icon={Shield01Icon} className="size-4" />
+                    Security
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                    variant="destructive"
+                    onClick={handleLogout}
+                >
+                    <HugeiconsIcon icon={Logout01Icon} className="size-4" />
+                    Sign out
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
